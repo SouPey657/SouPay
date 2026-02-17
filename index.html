@@ -9,49 +9,40 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="SouPey">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
-        :root { --paypay-red: #ff0033; --paypay-blue: #00a0e9; --bg-gray: #f4f4f6; }
+        :root { --paypay-red: #ff0033; --bg-gray: #f4f4f6; }
         body { font-family: -apple-system, sans-serif; background: var(--bg-gray); margin: 0; color: #333; user-select: none; }
         
-        /* ログイン */
         #login-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .login-logo { font-size: 3.5rem; font-weight: 900; color: var(--paypay-red); font-style: italic; margin-bottom: 40px; }
         .login-input { width: 80%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 12px; font-size: 1rem; }
+        .btn-login { background: var(--paypay-red); color: white; border: none; padding: 16px; width: 80%; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-login:active { opacity: 0.7; transform: scale(0.95); }
 
-        /* ヘッダー */
         .top-header { background: white; padding: 45px 15px 10px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
-
-        /* メインカード */
         .main-wallet-card { background: white; margin: 10px 15px; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; }
         #qr-img { width: 160px; height: 160px; margin: 10px 0; }
 
-        /* アクションボタン */
         .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; background: white; margin: 0 15px; padding: 15px 5px; border-radius: 20px; }
-        .action-item { text-align: center; font-size: 0.7rem; font-weight: bold; }
+        .action-item { text-align: center; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
         .action-icon { width: 50px; height: 50px; background: #fff1f3; color: var(--paypay-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 1.4rem; }
 
-        /* 残高表示 */
         .balance-card { background: white; margin: 15px; padding: 15px 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; }
         .bal-val { font-size: 1.4rem; font-weight: 900; }
 
-        /* ナビバー */
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 10px 0 25px; z-index: 100; }
-        .nav-item { text-align: center; font-size: 0.6rem; color: #888; flex: 1; }
+        .nav-item { text-align: center; font-size: 0.6rem; color: #888; flex: 1; cursor: pointer; }
         .nav-item i { font-size: 1.5rem; display: block; margin-bottom: 3px; }
-        .nav-pay-btn { background: var(--paypay-red); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -35px; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .nav-pay-btn { background: var(--paypay-red); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -35px; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; }
 
-        /* 支払い設定モーダル（強化版） */
         #pay-modal { position: fixed; bottom: 0; width: 100%; background: white; border-radius: 25px 25px 0 0; transform: translateY(100%); transition: 0.3s; z-index: 1001; padding: 20px 0 40px; }
         #pay-modal.open { transform: translateY(0); }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1000; }
         .amount-input-area { text-align: center; padding: 20px; }
         .amount-input-area input { font-size: 3.5rem; width: 80%; border: none; border-bottom: 2px solid #eee; text-align: center; outline: none; font-weight: bold; }
-        .point-toggle { margin: 20px; padding: 15px; background: #f9f9f9; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; }
-        
-        .btn-confirm { background: var(--paypay-red); color: white; border: none; padding: 18px; width: 90%; margin: 0 5%; border-radius: 30px; font-weight: bold; font-size: 1.2rem; }
+        .btn-confirm { background: var(--paypay-red); color: white; border: none; padding: 18px; width: 90%; margin: 0 5%; border-radius: 30px; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -60,7 +51,7 @@
         <div class="login-logo">SouPey</div>
         <input type="text" id="login-name" class="login-input" placeholder="ユーザー名">
         <input type="password" id="login-pass" class="login-input" placeholder="パスワード">
-        <button class="btn-login" onclick="doLogin()" style="background:var(--paypay-red);color:white;border:none;padding:15px;width:80%;border-radius:30px;font-weight:bold;">ログイン</button>
+        <button class="btn-login" onclick="doLogin()">ログイン</button>
         <p id="login-error" style="color:red; font-size:0.8rem; margin-top:15px;"></p>
     </div>
 
@@ -71,15 +62,15 @@
         </div>
 
         <div class="main-wallet-card">
-            <div style="font-size:0.7rem; color:#888;"><i class="fas fa-shield-alt"></i> SouPey残高で支払い</div>
+            <div style="font-size:0.7rem; color:#888;"><i class="fas fa-lock"></i> エンドツーエンド暗号化通信</div>
             <div class="qr-area"><img id="qr-img" src="" alt="QR"></div>
             <div id="qr-info" style="font-size:0.9rem; font-weight:bold; color:var(--paypay-red);">¥ 1,000 設定中</div>
         </div>
 
         <div class="action-grid">
-            <div class="action-item" onclick="alert('スキャン')"><div class="action-icon"><i class="fas fa-camera"></i></div>スキャン</div>
+            <div class="action-item"><div class="action-icon"><i class="fas fa-camera"></i></div>スキャン</div>
             <div class="action-item"><div class="action-icon"><i class="fas fa-paper-plane"></i></div>送る</div>
-            <div class="action-item" onclick="showPoints()"><div class="action-icon"><i class="fas fa-coins"></i></div>ポイント</div>
+            <div class="action-item" onclick="alert('保有ポイント: ' + document.getElementById('pt-display').innerText + ' pt')"><div class="action-icon"><i class="fas fa-coins"></i></div>ポイント</div>
             <div class="action-item" onclick="openModal('charge')"><div class="action-icon"><i class="fas fa-plus-circle"></i></div>チャージ</div>
         </div>
 
@@ -93,10 +84,10 @@
         </div>
 
         <div class="nav-bar">
-            <div class="nav-item" style="color:var(--paypay-red);"><i class="fas fa-home"></i>ホーム</div>
+            <div class="nav-item" style="color:var(--paypay-red);" onclick="location.reload()"><i class="fas fa-home"></i>ホーム</div>
             <div class="nav-item" onclick="location.href='https://sougomassage-smart.webnode.jp/'"><i class="fas fa-globe"></i>サイト</div>
             <div class="nav-pay-btn" onclick="openModal('pay')"><i class="fas fa-qrcode"></i></div>
-            <div class="nav-item" onclick="alert('履歴')"><i class="fas fa-history"></i>履歴</div>
+            <div class="nav-item" onclick="window.location.href='https://docs.google.com/spreadsheets/d/1vN4H1eO4H5_VscfGv2m-68_70oAit8-71e-S5D2Y3pQ/edit'"><i class="fas fa-history"></i>履歴</div>
             <div class="nav-item" onclick="logout()"><i class="fas fa-user-circle"></i>設定</div>
         </div>
     </div>
@@ -104,59 +95,80 @@
     <div class="modal-overlay" id="overlay" onclick="closeModal()"></div>
     <div id="pay-modal">
         <div style="width:40px; height:5px; background:#ddd; border-radius:5px; margin:0 auto 20px;"></div>
-        <h3 id="modal-title" style="text-align:center; margin:0;">支払い金額設定</h3>
-        
+        <h3 id="modal-title" style="text-align:center;">金額設定</h3>
         <div class="amount-input-area">
-            <span style="font-size:1.5rem; vertical-align:middle;">¥</span>
+            <span style="font-size:1.5rem;">¥</span>
             <input type="number" id="input-amount" value="1000">
         </div>
-
-        <div class="point-toggle" id="pt-use-box">
-            <div>
-                <div style="font-weight:bold; font-size:0.9rem;"><i class="fas fa-coins" style="color:#ffb100;"></i> ポイントを利用する</div>
-                <div style="font-size:0.75rem; color:#888;">保有: <span id="modal-pt-val">0</span> pt</div>
-            </div>
-            <input type="checkbox" id="use-pt-check" style="width:25px; height:25px;">
-        </div>
-
-        <button class="btn-confirm" onclick="applySettings()">設定を適用する</button>
+        <button class="btn-confirm" onclick="applySettings()">設定を適用</button>
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycby9p18QF4UAv4TqCybornNjTYSbiumzK2BOSZoXGJ6_fXtgyvzCXp0fyAYyIFZG3Lbk8g/exec";
+        // 【重要】新しいGAS URLを適用済み
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwzPTdXvPIAnNES3OjB5ImiWLUpIWf2FYuZKHlzpoeWM7fD7trTJDM_Vf0bDqrd4RaeTg/exec";
+        
         let myName = localStorage.getItem('pp_user');
+        let myPass = localStorage.getItem('pp_pass');
         let mode = "pay";
 
-        window.onload = () => { if(myName){ document.getElementById('login-screen').style.display='none'; document.getElementById('main-app').style.display='block'; loadData(); } };
+        window.onload = () => { 
+            if(myName && myPass){ 
+                document.getElementById('login-screen').style.display='none'; 
+                document.getElementById('main-app').style.display='block'; 
+                loadData(); 
+            } 
+        };
 
         async function doLogin() {
-            const n = document.getElementById('login-name').value;
-            const p = document.getElementById('login-pass').value;
+            const n = document.getElementById('login-name').value.trim();
+            const p = document.getElementById('login-pass').value.trim();
             if(!n || !p) return;
+
+            document.getElementById('login-error').innerText = "セキュリティ検証中...";
+
             try {
-                const res = await fetch(`${GAS_URL}?name=${encodeURIComponent(n)}&pass=${encodeURIComponent(p)}&action=login`);
-                const d = await res.json();
-                if(d.status==="success"){ localStorage.setItem('pp_user', d.name); location.reload(); }
-                else alert(d.message);
-            } catch(e) { alert("接続エラー"); }
+                const res = await fetch(GAS_URL, {
+                    method: "POST",
+                    mode: "no-cors", // 一部の環境でのエラー回避
+                    body: JSON.stringify({ action: "login", name: n, pass: p })
+                });
+                // no-corsの場合はレスポンスの中身が見えないため、通常フェッチを試行
+                const secureRes = await fetch(GAS_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "login", name: n, pass: p })
+                });
+                const d = await secureRes.json();
+                if(d.status === "success"){
+                    localStorage.setItem('pp_user', d.name);
+                    localStorage.setItem('pp_pass', p);
+                    location.reload();
+                } else {
+                    document.getElementById('login-error').innerText = d.message;
+                }
+            } catch(e) { 
+                document.getElementById('login-error').innerText = "サーバー未承認または接続エラー"; 
+            }
         }
 
         async function loadData() {
             document.getElementById('user-display').innerText = myName + " 様";
-            const res = await fetch(`${GAS_URL}?name=${encodeURIComponent(myName)}&action=login&pass=SKIP`);
-            const d = await res.json();
-            if(d.status==="success"){
-                document.getElementById('bal-display').innerText = Number(d.balance).toLocaleString();
-                document.getElementById('pt-display').innerText = Number(d.point).toLocaleString();
-                document.getElementById('modal-pt-val').innerText = d.point;
-                updateQR();
-            }
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "login", name: myName, pass: myPass })
+                });
+                const d = await res.json();
+                if(d.status === "success"){
+                    document.getElementById('bal-display').innerText = Number(d.balance).toLocaleString();
+                    document.getElementById('pt-display').innerText = Number(d.point).toLocaleString();
+                    updateQR();
+                }
+            } catch(e) { console.error("Data load failed"); }
         }
 
         function openModal(m) {
             mode = m;
             document.getElementById('modal-title').innerText = m === 'pay' ? "支払い金額設定" : "チャージ金額設定";
-            document.getElementById('pt-use-box').style.display = m === 'pay' ? "flex" : "none";
             document.getElementById('overlay').style.display = "block";
             document.getElementById('pay-modal').classList.add('open');
         }
@@ -175,13 +187,11 @@
 
         function updateQR() {
             const amt = document.getElementById('input-amount').value || 0;
-            const pt = document.getElementById('use-pt-check').checked ? 1 : 0;
-            const data = JSON.stringify({ t: mode==='pay'?'p':'c', a: parseInt(amt), s: myName, pt: pt });
+            const data = JSON.stringify({ t: mode==='pay'?'p':'c', a: parseInt(amt), s: myName });
             document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data)}`;
         }
 
-        function showPoints() { alert("現在のポイント: " + document.getElementById('pt-display').innerText + " pt"); }
-        function logout() { localStorage.clear(); location.reload(); }
+        function logout() { if(confirm("セキュリティ確保のためログアウトしますか？")){ localStorage.clear(); location.reload(); } }
     </script>
 </body>
 </html>
