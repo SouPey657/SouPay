@@ -1,0 +1,16 @@
+{
+  "name": "SouPey",
+  "short_name": "SouPey",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff0033",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/602/602182.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
