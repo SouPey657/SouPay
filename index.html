@@ -62,7 +62,8 @@
     </div>
 
     <script>
-        const GAS_URL = "あなたのGASデプロイURLをここに";
+        // 提供されたURLをセットしました
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwu7LVX0uWWSFrDKofN2_gKmj8eTI1HX9sFl2AihIsJLMMWOoy7GwOAyukE8WiO6-_IrA/exec";
         let myName = localStorage.getItem('pp_user');
         let currentMode = "pay";
 
@@ -75,7 +76,7 @@
             const name = document.getElementById('login-name').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
             fetch(`${GAS_URL}?name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&action=login`).then(res => res.json()).then(data => {
-                if (data.status === "success") { localStorage.setItem('pp_user', data.name); location.reload(); } else { alert("失敗"); }
+                if (data.status === "success") { localStorage.setItem('pp_user', data.name); location.reload(); } else { alert("ログイン失敗"); }
             });
         }
 
