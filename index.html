@@ -4,95 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SouPey</title>
-    
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SouPey">
-    <meta name="mobile-web-app-capable" content="yes">
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
-
     <style>
-        :root { --sou-red: #ff0033; --sou-grad: linear-gradient(135deg, #ff0055 0%, #ff0033 100%); }
-        body { font-family: -apple-system, sans-serif; background: #f5f5f7; margin: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
-        
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .login-logo { font-size: 4rem; font-weight: bold; color: var(--sou-red); margin-bottom: 40px; font-style: italic; }
-        .login-input { width: 80%; padding: 16px; border: 1px solid #ddd; border-radius: 12px; font-size: 1rem; margin-bottom: 15px; text-align: center; outline: none; }
-        
-        .header { background: var(--sou-grad); color: white; padding: env(safe-area-inset-top) 15px 15px; font-weight: bold; text-align: center; font-size: 1.2rem; }
-
-        .balance-card { background: white; margin: 20px; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-left: 6px solid var(--sou-red); }
-        .label { font-size: 0.85rem; color: #888; font-weight: bold; margin-bottom: 5px; }
-        .amount { font-size: 2.5rem; font-weight: bold; }
-
-        .main-card { background: white; margin: 0 20px; border-radius: 16px; padding: 20px; text-align: center; }
+        :root { --sou-red: #ff0033; --sou-gold: #ffb100; --sou-grad: linear-gradient(135deg, #ff0055 0%, #ff0033 100%); }
+        body { font-family: -apple-system, sans-serif; background: #f5f5f7; margin: 0; user-select: none; }
+        .header { background: var(--sou-grad); color: white; padding: env(safe-area-inset-top) 15px 15px; text-align: center; font-weight: bold; }
+        .info-container { display: flex; gap: 10px; margin: 20px; }
+        .card { background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); flex: 1; }
+        .card.balance { border-left: 5px solid var(--sou-red); }
+        .card.point { border-left: 5px solid var(--sou-gold); }
+        .label { font-size: 0.7rem; color: #888; font-weight: bold; margin-bottom: 5px; }
+        .val { font-size: 1.4rem; font-weight: bold; }
+        .main-card { background: white; margin: 0 20px 20px; border-radius: 16px; padding: 20px; text-align: center; }
         .btn-main { background: var(--sou-grad); color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; width: 100%; margin: 10px 0; font-size: 1.1rem; }
-        .btn-sub { background: #333; color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; width: 100%; margin: 10px 0; }
-        
-        #qr-canvas { width: 100%; border-radius: 16px; background: #000; }
-        .logout-link { display: inline-block; margin-top: 25px; color: #999; text-decoration: underline; font-size: 0.8rem; border: none; background: none; }
+        #login-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .login-input { width: 80%; padding: 16px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; text-align: center; }
     </style>
 </head>
 <body>
-
     <div id="login-screen">
-        <div class="login-logo">SouPey</div>
+        <div style="font-size: 4rem; font-weight: bold; color: var(--sou-red); font-style: italic; margin-bottom: 40px;">SouPey</div>
         <input type="text" id="login-name" class="login-input" placeholder="ユーザー名">
         <input type="password" id="login-pass" class="login-input" placeholder="パスワード">
         <button class="btn-main" style="width: 80%;" onclick="doLogin()">ログイン</button>
     </div>
-
-    <div id="main-ui">
-        <div class="header" id="user-header">SouPey</div>
-        <div class="balance-card">
-            <div class="label">SouPey残高</div>
-            <div class="amount">¥ <span id="bal-display">----</span></div>
-        </div>
-        <div class="main-card" id="menu-area">
-            <button class="btn-main" onclick="showPay()">支払う</button>
-            <button class="btn-sub" onclick="showScan()">スキャン（受け取り）</button>
-            <button class="logout-link" onclick="logout()">ログアウト</button>
-        </div>
-        <div class="main-card" id="pay-area" style="display:none;">
-            <div class="label">金額を設定</div>
-            ¥ <input type="number" id="pay-val" value="1000" style="font-size:2rem; width:150px; text-align:center; border:none; border-bottom:3px solid var(--sou-red); font-weight:bold; outline:none;">
-            <div id="qrcode" style="display:flex; justify-content:center; margin:25px 0;"></div>
-            <button class="btn-sub" onclick="location.reload()">閉じる</button>
-        </div>
-        <div class="main-card" id="scan-area" style="display:none;">
-            <canvas id="qr-canvas" hidden></canvas>
-            <button class="btn-sub" style="margin-top:20px;" onclick="location.reload()">キャンセル</button>
-        </div>
+    <div class="header" id="user-header">SouPey</div>
+    <div class="info-container">
+        <div class="card balance"><div class="label">残高</div><div class="val">¥ <span id="bal-display">----</span></div></div>
+        <div class="card point"><div class="label">ポイント</div><div class="val"><span id="pt-display">----</span>pt</div></div>
     </div>
-
+    <div class="main-card" id="menu-area">
+        <button class="btn-main" onclick="showPay()">支払う</button>
+        <button class="btn-main" style="background:#333;" onclick="showScan()">個人送金受取</button>
+        <button onclick="localStorage.clear(); location.reload();" style="border:none; background:none; color:#999; margin-top:20px; text-decoration:underline;">ログアウト</button>
+    </div>
+    <div class="main-card" id="pay-area" style="display:none;">
+        <input type="number" id="pay-val" value="1000" style="font-size:2rem; width:150px; text-align:center; border:none; border-bottom:3px solid var(--sou-red); font-weight:bold; outline:none;">
+        <div id="qrcode" style="display:flex; justify-content:center; margin:20px 0;"></div>
+        <button class="btn-main" style="background:#333;" onclick="location.reload()">閉じる</button>
+    </div>
+    <div class="main-card" id="scan-area" style="display:none;"><canvas id="qr-canvas" hidden></canvas></div>
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbw6SDUPyash2cTdXrRFD3jgs5IRjE4Pl2MESTnMsM1vfKYrL9fH0xPGI1vQSlM6-LfNOA/exec";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxVthSAwXkOLdT51c8JecC-dCbbdjpriz0OP7P9YSBp8rZxuNQ7AG3NK2TkPZ52nAM4og/exec";
         let myName = localStorage.getItem('pp_user');
-        window.onload = () => { if (myName) { document.getElementById('login-screen').style.display = 'none'; loadBalance(); } };
+        window.onload = () => { if (myName) { document.getElementById('login-screen').style.display = 'none'; loadData(); } };
         function doLogin() {
             const name = document.getElementById('login-name').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
-            fetch(`${GAS_URL}?name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&action=login`)
-                .then(res => res.json()).then(data => {
-                    if (data.status === "success") { localStorage.setItem('pp_user', data.name); myName = data.name; document.getElementById('login-screen').style.display = 'none'; loadBalance(); }
-                    else { alert("エラー: " + data.message); }
-                });
+            fetch(`${GAS_URL}?name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&action=login`).then(res => res.json()).then(data => {
+                if (data.status === "success") { localStorage.setItem('pp_user', data.name); location.reload(); } else { alert(data.message); }
+            });
         }
-        function loadBalance() {
+        function loadData() {
             document.getElementById('user-header').innerText = myName + " のSouPey";
-            fetch(`${GAS_URL}?name=${encodeURIComponent(myName)}&action=login&pass=SKIP`)
-                .then(res => res.json()).then(data => {
-                    if (data.status === "success") { document.getElementById('bal-display').innerText = Number(data.balance).toLocaleString(); }
-                });
+            fetch(`${GAS_URL}?name=${encodeURIComponent(myName)}&action=login&pass=SKIP`).then(res => res.json()).then(data => {
+                if (data.status === "success") {
+                    document.getElementById('bal-display').innerText = Number(data.balance).toLocaleString();
+                    document.getElementById('pt-display').innerText = Number(data.point).toLocaleString();
+                }
+            });
         }
-        function logout() { localStorage.clear(); location.reload(); }
         function showPay() {
             document.getElementById('menu-area').style.display = 'none';
             document.getElementById('pay-area').style.display = 'block';
-            new QRCode(document.getElementById('qrcode'), { text: JSON.stringify({amt: document.getElementById('pay-val').value}), width: 200, height: 200 });
+            const draw = () => {
+                document.getElementById('qrcode').innerHTML = "";
+                const qrData = JSON.stringify({ amt: document.getElementById('pay-val').value, sender: myName });
+                new QRCode(document.getElementById('qrcode'), { text: qrData, width: 200, height: 200 });
+            };
+            draw();
+            document.getElementById('pay-val').oninput = draw;
         }
         function showScan() {
             document.getElementById('menu-area').style.display = 'none';
@@ -109,8 +94,9 @@
                         const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
                         if (code) {
                             const d = JSON.parse(code.data);
-                            fetch(`${GAS_URL}?name=${encodeURIComponent(myName)}&action=update&amount=${d.amt}`)
-                                .then(() => { speechSynthesis.speak(new SpeechSynthesisUtterance("ソウペイ")); alert(d.amt + "円受け取りました！"); location.reload(); });
+                            fetch(`${GAS_URL}?name=${encodeURIComponent(myName)}&action=update&amount=${d.amt}`).then(() => {
+                                alert(d.amt + "円受け取りました！"); location.reload();
+                            });
                             return;
                         }
                     }
