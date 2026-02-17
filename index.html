@@ -4,19 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SouPey</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
             --paypay-red: #ff0033;
             --bg-gray: #f4f4f6;
-            --card-white: #ffffff;
         }
         body { font-family: -apple-system, sans-serif; background: var(--bg-gray); margin: 0; color: #333; overflow-x: hidden; }
         
-        /* ログイン画面 */
+        /* ログイン */
         #login-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .login-logo { font-size: 3.5rem; font-weight: 900; color: var(--paypay-red); font-style: italic; margin-bottom: 40px; }
-        .login-input { width: 85%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 12px; font-size: 1rem; background: #fafafa; }
+        .login-input { width: 85%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 12px; font-size: 1rem; }
         .btn-login { background: var(--paypay-red); color: white; border: none; padding: 16px; width: 85%; border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
 
         /* ヘッダー */
@@ -27,29 +26,25 @@
         .qr-area { display: flex; justify-content: center; margin: 10px 0; }
         #qr-img { width: 160px; height: 160px; }
 
-        /* 4つのアプリアイコンエリア */
+        /* アクションボタン */
         .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; background: white; margin: 0 15px; padding: 15px 5px; border-radius: 20px; }
         .action-item { text-align: center; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
-        .action-icon { width: 50px; height: 50px; background: #fff1f3; color: var(--paypay-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 1.4rem; transition: 0.2s; }
-        .action-icon:active { transform: scale(0.9); background: #ffe0e5; }
+        /* 【重要】アイコンが見えるよう背景色とサイズを調整 */
+        .action-icon { width: 50px; height: 50px; background: #fff1f3; color: var(--paypay-red); border-radius: 50%; display: flex !important; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 1.4rem; }
 
-        /* 残高・ポイント表示 */
+        /* 残高 */
         .balance-card { background: white; margin: 15px; padding: 15px 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; }
         .bal-val { font-size: 1.4rem; font-weight: 900; }
         .bal-label { font-size: 0.8rem; color: #888; font-weight: bold; }
 
-        /* 下部ナビゲーションバー */
+        /* ナビバー */
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 10px 0 25px; }
         .nav-item { text-align: center; font-size: 0.6rem; color: #888; flex: 1; cursor: pointer; }
         .nav-item.active { color: var(--paypay-red); }
-        .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 3px; }
+        .nav-item i { font-size: 1.5rem; display: block; margin-bottom: 3px; color: #888; }
+        .nav-item.active i { color: var(--paypay-red); }
         
-        /* 中央の大きな支払いボタン */
-        .nav-pay-btn { background: var(--paypay-red); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -35px; box-shadow: 0 4px 12px rgba(255,0,51,0.4); border: 5px solid white; cursor: pointer; transition: 0.2s; }
-        .nav-pay-btn:active { transform: scale(0.9); }
-
-        /* 金額入力画面 */
-        #pay-screen { position: fixed; inset: 0; background: white; z-index: 1000; display: none; padding-top: 60px; }
+        .nav-pay-btn { background: var(--paypay-red); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -35px; box-shadow: 0 4px 12px rgba(255,0,51,0.4); border: 5px solid white; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -64,63 +59,45 @@
 
     <div id="main-app" style="display:none;">
         <div class="top-header">
-            <div><i class="fa-solid fa-bars" style="margin-right: 15px; font-size: 1.2rem;"></i> <span id="user-display">ユーザー様</span></div>
-            <i class="fa-regular fa-bell" style="font-size: 1.3rem;"></i>
+            <div><i class="fas fa-bars" style="margin-right: 15px;"></i> <span id="user-display">ユーザー様</span></div>
+            <i class="far fa-bell" style="font-size: 1.3rem;"></i>
         </div>
 
         <div class="main-wallet-card">
-            <div style="font-size:0.7rem; color:#888; margin-bottom:10px;"><i class="fa-solid fa-shield-halved"></i> 支払い方法：SouPey残高</div>
+            <div style="font-size:0.7rem; color:#888; margin-bottom:10px;"><i class="fas fa-shield-alt"></i> 支払い方法：SouPey残高</div>
             <div class="qr-area"><img id="qr-img" src="" alt="QR"></div>
-            <div style="color:var(--paypay-red); font-size:0.8rem; font-weight:bold;">QRコードをスキャンしてもらう</div>
+            <div style="color:var(--paypay-red); font-size:0.8rem; font-weight:bold;">QRコードで決済</div>
         </div>
 
         <div class="action-grid">
-            <div class="action-item" onclick="alert('カメラを起動します')">
-                <div class="action-icon"><i class="fa-solid fa-camera"></i></div>スキャン
-            </div>
-            <div class="action-item" onclick="alert('送る相手を選択')">
-                <div class="action-icon"><i class="fa-solid fa-paper-plane"></i></div>送る
-            </div>
-            <div class="action-item" onclick="showCurrentPoints()">
-                <div class="action-icon"><i class="fa-solid fa-coins"></i></div>ポイント
-            </div>
-            <div class="action-item" onclick="showCharge()">
-                <div class="action-icon"><i class="fa-solid fa-circle-plus"></i></div>チャージ
-            </div>
+            <div class="action-item" onclick="alert('スキャン')"><div class="action-icon"><i class="fas fa-camera"></i></div>スキャン</div>
+            <div class="action-item"><div class="action-icon"><i class="fas fa-paper-plane"></i></div>送る</div>
+            <div class="action-item" onclick="showCurrentPoints()"><div class="action-icon"><i class="fas fa-coins"></i></div>ポイント</div>
+            <div class="action-item" onclick="showCharge()"><div class="action-icon"><i class="fas fa-plus-circle"></i></div>チャージ</div>
         </div>
 
         <div class="balance-card">
-            <div><i class="fa-solid fa-p" style="color:var(--paypay-red); margin-right:5px;"></i> <span class="bal-label">使えるポイント</span></div>
-            <div><span class="bal-val" id="pt-display">0</span> <span style="font-size:0.8rem;">pt</span></div>
+            <div><i class="fas fa-parking" style="color:var(--paypay-red);"></i> <span class="bal-label">使えるポイント</span></div>
+            <div><span class="bal-val" id="pt-display">0</span> pt</div>
         </div>
 
-        <div class="balance-card" style="margin-top: -5px;">
-            <div><i class="fa-solid fa-yen-sign" style="color:var(--paypay-red); margin-right:5px;"></i> <span class="bal-label">SouPey残高</span></div>
-            <div><span class="bal-val">¥ <span id="bal-display">0</span></span></div>
+        <div class="balance-card" style="margin-top:-5px;">
+            <div><i class="fas fa-yen-sign" style="color:var(--paypay-red);"></i> <span class="bal-label">SouPey残高</span></div>
+            <div>¥ <span class="bal-val" id="bal-display">0</span></div>
         </div>
 
         <div class="nav-bar">
-            <div class="nav-item active" onclick="location.reload()">
-                <i class="fa-solid fa-house"></i>ホーム
-            </div>
-            <div class="nav-item" onclick="location.href='https://sougomassage-smart.webnode.jp/'">
-                <i class="fa-solid fa-globe"></i>サイト
-            </div>
-            <div class="nav-pay-btn" onclick="showPay()">
-                <i class="fa-solid fa-qrcode" style="font-size:1.8rem;"></i>
-            </div>
-            <div class="nav-item" onclick="alert('履歴・残高詳細を表示')">
-                <i class="fa-solid fa-wallet"></i>残高
-            </div>
-            <div class="nav-item" onclick="logout()">
-                <i class="fa-solid fa-circle-user"></i>設定
-            </div>
+            <div class="nav-item active"><i class="fas fa-home"></i>ホーム</div>
+            <div class="nav-item" onclick="location.href='https://sougomassage-smart.webnode.jp/'"><i class="fas fa-globe"></i>サイト</div>
+            <div class="nav-pay-btn" onclick="showPay()"><i class="fas fa-qrcode" style="font-size:1.8rem;"></i></div>
+            <div class="nav-item"><i class="fas fa-wallet"></i>残高</div>
+            <div class="nav-item" onclick="logout()"><i class="fas fa-user-circle"></i>設定</div>
         </div>
     </div>
 
-    <div id="pay-screen">
+    <div id="pay-screen" style="position:fixed; inset:0; background:white; z-index:1000; display:none; padding-top:60px;">
         <h2 id="mode-title" style="text-align:center;">金額入力</h2>
-        <div style="text-align:center; margin: 30px 0;">
+        <div style="text-align:center; margin:30px 0;">
             <span style="font-size:1.5rem; font-weight:bold;">¥</span>
             <input type="number" id="pay-val" value="1000" style="font-size:3rem; width:60%; border:none; border-bottom:3px solid var(--paypay-red); text-align:center; outline:none; font-weight:bold;">
         </div>
@@ -135,13 +112,7 @@
         let myName = localStorage.getItem('pp_user');
         let currentMode = "pay";
 
-        window.onload = () => {
-            if (myName) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-app').style.display = 'block';
-                loadData();
-            }
-        };
+        window.onload = () => { if (myName) { document.getElementById('login-screen').style.display = 'none'; document.getElementById('main-app').style.display = 'block'; loadData(); } };
 
         async function doLogin() {
             const name = document.getElementById('login-name').value.trim();
@@ -170,24 +141,17 @@
             } catch(e) {}
         }
 
-        function showCurrentPoints() {
-            const pt = document.getElementById('pt-display').innerText;
-            alert("現在のポイント： " + pt + " pt");
-        }
-
-        function showPay() { currentMode="pay"; document.getElementById('mode-title').innerText="支払い金額設定"; document.getElementById('pay-screen').style.display="block"; }
-        function showCharge() { currentMode="charge"; document.getElementById('mode-title').innerText="チャージ金額設定"; document.getElementById('pay-screen').style.display="block"; }
+        function showCurrentPoints() { alert("現在のポイント： " + document.getElementById('pt-display').innerText + " pt"); }
+        function showPay() { currentMode="pay"; document.getElementById('mode-title').innerText="支払い金額"; document.getElementById('pay-screen').style.display="block"; }
+        function showCharge() { currentMode="charge"; document.getElementById('mode-title').innerText="チャージ金額"; document.getElementById('pay-screen').style.display="block"; }
         function hidePay() { document.getElementById('pay-screen').style.display="none"; }
         function confirmAmount() { hidePay(); updateQR(); }
-
         function updateQR() {
             const val = document.getElementById('pay-val').value || 0;
             const data = JSON.stringify({ t: currentMode==="pay"?"p":"c", a: parseInt(val), s: myName });
             document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data)}`;
         }
-
         function logout() { if(confirm("ログアウトしますか？")){ localStorage.clear(); location.reload(); } }
     </script>
 </body>
 </html>
-
