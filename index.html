@@ -22,61 +22,98 @@
         #qr-container { margin: 15px 0; min-height: 220px; display: flex; justify-content: center; align-items: center; }
         #qr-img { width: 220px; height: 220px; background: #fff; border: 4px solid #fff; }
         input[type="number"] { font-size: 2.8rem; width: 90%; text-align: center; border: none; border-bottom: 3px solid var(--sou-red); font-weight: bold; outline: none; background: transparent; }
-        #login-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .login-input { width: 80%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 10px; text-align: center; }
+        
+        /* ログイン画面専用スタイル */
+        #login-screen { position: fixed; inset: 0; background: #f5f5f7; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .login-input { width: 80%; padding: 15px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 10px; text-align: center; font-size: 1rem; }
     </style>
 </head>
 <body>
-    <div id="login-screen" style="display:none;">
+
+    <div id="login-screen">
         <div style="font-size: 3rem; font-weight: 900; color: var(--sou-red); font-style: italic; margin-bottom: 30px;">SouPey</div>
         <input type="text" id="login-name" class="login-input" placeholder="ユーザー名">
         <input type="password" id="login-pass" class="login-input" placeholder="パスワード">
         <button class="btn-main" style="width: 80%;" onclick="doLogin()">ログイン</button>
+        <p id="login-error" style="color:red; font-size:0.8rem; margin-top:10px;"></p>
     </div>
 
-    <div class="header" id="user-header">SouPey</div>
-    <div class="info-container">
-        <div class="card balance"><div class="label">残高</div><div class="val">¥ <span id="bal-display">----</span></div></div>
-        <div class="card point"><div class="label">ポイント</div><div class="val"><span id="pt-display">----</span> pt</div></div>
-    </div>
-
-    <div id="menu-area">
-        <div class="main-card">
-            <button class="btn-main" onclick="showPay()">支払う</button>
-            <button class="btn-main" style="background:#333;" onclick="showCharge()">チャージする</button>
+    <div id="main-app" style="display:none;">
+        <div class="header" id="user-header">SouPey</div>
+        <div class="info-container">
+            <div class="card balance"><div class="label">残高</div><div class="val">¥ <span id="bal-display">----</span></div></div>
+            <div class="card point"><div class="label">ポイント</div><div class="val"><span id="pt-display">----</span> pt</div></div>
         </div>
-        <button onclick="localStorage.clear(); location.reload();" style="border:none; background:none; color:#bbb; text-decoration:underline;">ログアウト</button>
-    </div>
 
-    <div id="pay-area" style="display:none;">
-        <div class="main-card">
-            <h2 id="mode-title" style="font-size:1rem; color:#333;">金額入力</h2>
-            <input type="number" id="pay-val" value="1000" inputmode="numeric">
-            <div id="pt-use-row" class="setting-row">
-                <span style="font-size:0.9rem; font-weight:bold;">ポイントを利用する</span>
-                <input type="checkbox" id="use-pt" onchange="updateQR()" style="width:25px; height:25px; accent-color:var(--sou-gold);">
+        <div id="menu-area">
+            <div class="main-card">
+                <button class="btn-main" onclick="showPay()">支払う</button>
+                <button class="btn-main" style="background:#333;" onclick="showCharge()">チャージする</button>
             </div>
-            <div id="qr-container"><img id="qr-img" src="" alt="QR"></div>
-            <button class="btn-main" style="background:#666;" onclick="location.reload()">戻る</button>
+            <button onclick="logout()" style="border:none; background:none; color:#bbb; text-decoration:underline; margin-top:10px;">ログアウト</button>
+        </div>
+
+        <div id="pay-area" style="display:none;">
+            <div class="main-card">
+                <h2 id="mode-title" style="font-size:1rem; color:#333;">金額入力</h2>
+                <input type="number" id="pay-val" value="1000" inputmode="numeric">
+                <div id="pt-use-row" class="setting-row">
+                    <span style="font-size:0.9rem; font-weight:bold;">ポイントを利用する</span>
+                    <input type="checkbox" id="use-pt" onchange="updateQR()" style="width:25px; height:25px; accent-color:var(--sou-gold);">
+                </div>
+                <div id="qr-container"><img id="qr-img" src="" alt="QR"></div>
+                <button class="btn-main" style="background:#666;" onclick="location.reload()">戻る</button>
+            </div>
         </div>
     </div>
 
     <script>
+        // あなたの最新のGAS URL
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwu7LVX0uWWSFrDKofN2_gKmj8eTI1HX9sFl2AihIsJLMMWOoy7GwOAyukE8WiO6-_IrA/exec";
+        
         let myName = localStorage.getItem('pp_user');
         let currentMode = "pay";
 
+        // 起動時のチェック
         window.onload = () => {
-            if (!myName) { document.getElementById('login-screen').style.display = 'flex'; }
-            else { loadData(); }
+            if (myName) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                loadData();
+            }
         };
+
+        // ログイン処理
+        function doLogin() {
+            const name = document.getElementById('login-name').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+            const errLabel = document.getElementById('login-error');
+
+            if(!name || !pass) { errLabel.innerText = "名前とパスワードを入力してください"; return; }
+            errLabel.innerText = "認証中...";
+
+            fetch(`${GAS_URL}?name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&action=login`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    localStorage.setItem('pp_user', data.name);
+                    location.reload(); // 画面をリロードしてメイン画面へ
+                } else {
+                    errLabel.innerText = data.message || "ログイン失敗";
+                }
+            })
+            .catch(e => {
+                errLabel.innerText = "サーバー接続エラー。URLを確認してください。";
+            });
+        }
 
         function loadData() {
             document.getElementById('user-header').innerText = myName + " のSouPey";
             fetch(`${GAS_URL}?name=${encodeURIComponent(myName)}&action=login&pass=SKIP`)
-            .then(res => res.json()).then(data => {
+            .then(res => res.json())
+            .then(data => {
                 if (data.status === "success") {
-                    // NaN対策：数字以外のゴミを消して強制数値化
+                    // NaN対策（徹底版）
                     const clean = (v) => {
                         let n = Number(String(v).replace(/[^\d.-]/g, ''));
                         return isNaN(n) ? 0 : n;
@@ -87,12 +124,9 @@
             });
         }
 
-        function doLogin() {
-            const name = document.getElementById('login-name').value.trim();
-            const pass = document.getElementById('login-pass').value.trim();
-            fetch(`${GAS_URL}?name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&action=login`).then(res => res.json()).then(data => {
-                if (data.status === "success") { localStorage.setItem('pp_user', data.name); location.reload(); } else { alert("ログイン失敗"); }
-            });
+        function logout() {
+            localStorage.clear();
+            location.reload();
         }
 
         function showPay() { currentMode = "pay"; document.getElementById('mode-title').innerText = "支払い金額"; document.getElementById('pt-use-row').style.display = "flex"; openQR(); }
