@@ -62,7 +62,6 @@
     </div>
 
     <script>
-        // 提供されたURLをセットしました
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwu7LVX0uWWSFrDKofN2_gKmj8eTI1HX9sFl2AihIsJLMMWOoy7GwOAyukE8WiO6-_IrA/exec";
         let myName = localStorage.getItem('pp_user');
         let currentMode = "pay";
@@ -72,21 +71,27 @@
             else { loadData(); }
         };
 
+        function loadData() {
+            document.getElementById('user-header').innerText = myName + " のSouPey";
+            fetch(`${GAS_URL}?name=${encodeURIComponent(myName)}&action=login&pass=SKIP`)
+            .then(res => res.json()).then(data => {
+                if (data.status === "success") {
+                    // NaN対策：数字以外のゴミを消して強制数値化
+                    const clean = (v) => {
+                        let n = Number(String(v).replace(/[^\d.-]/g, ''));
+                        return isNaN(n) ? 0 : n;
+                    };
+                    document.getElementById('bal-display').innerText = clean(data.balance).toLocaleString();
+                    document.getElementById('pt-display').innerText = clean(data.point).toLocaleString();
+                }
+            });
+        }
+
         function doLogin() {
             const name = document.getElementById('login-name').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
             fetch(`${GAS_URL}?name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&action=login`).then(res => res.json()).then(data => {
                 if (data.status === "success") { localStorage.setItem('pp_user', data.name); location.reload(); } else { alert("ログイン失敗"); }
-            });
-        }
-
-        function loadData() {
-            document.getElementById('user-header').innerText = myName + " のSouPey";
-            fetch(`${GAS_URL}?name=${encodeURIComponent(myName)}&action=login&pass=SKIP`).then(res => res.json()).then(data => {
-                if (data.status === "success") {
-                    document.getElementById('bal-display').innerText = Number(data.balance).toLocaleString();
-                    document.getElementById('pt-display').innerText = Number(data.point).toLocaleString();
-                }
             });
         }
 
