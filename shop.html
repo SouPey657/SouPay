@@ -2,173 +2,45 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SouPey Biz - 決済レジ</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="manifest.json">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SouPey Biz</title>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        :root { 
-            --shop-blue: #0033ff; 
-            --shop-grad: linear-gradient(135deg, #0055ff 0%, #0033ff 100%); 
-            --bg-gray: #f2f4f7;
-            --success-green: #28a745;
-        }
-        body { 
-            font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; 
-            background: var(--bg-gray); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden;
-        }
-
-        /* ヘッダー */
-        .header { 
-            background: var(--shop-grad); color: white; padding: 20px 40px; 
-            display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-        .header-title { font-size: 2rem; font-weight: 900; font-style: italic; }
-
-        /* メインレイアウト（左右分割） */
-        .content { display: flex; flex: 1; padding: 25px; gap: 25px; box-sizing: border-box; }
-
-        /* 左パネル：レジ操作エリア */
-        .left-panel { flex: 1.6; display: flex; flex-direction: column; }
-        .main-card { 
-            background: white; border-radius: 24px; padding: 40px; flex: 1; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            box-shadow: 0 8px 30px rgba(0,0,0,0.06); text-align: center;
-        }
-
-        /* 右パネル：店舗状況エリア */
-        .right-panel { flex: 1; display: flex; flex-direction: column; gap: 20px; }
-        .side-card { background: white; border-radius: 24px; padding: 25px; box-shadow: 0 6px 20px rgba(0,0,0,0.04); }
-
-        /* スキャンボタン */
-        .btn-scan { 
-            background: var(--shop-grad); color: white; border: none; 
-            padding: 35px 70px; border-radius: 60px; font-size: 2.2rem; font-weight: bold; 
-            cursor: pointer; box-shadow: 0 10px 25px rgba(0,51,255,0.3); transition: 0.2s;
-        }
-        .btn-scan:active { transform: scale(0.95); }
-        
-        #qr-canvas { width: 100%; max-width: 550px; border-radius: 24px; border: 8px solid #222; display: none; margin-top: 15px; }
-        
-        .stat-label { font-size: 1rem; color: #888; font-weight: bold; margin-bottom: 8px; }
-        .stat-value { font-size: 3.5rem; font-weight: 900; color: var(--shop-blue); }
-        
-        .history-list { margin-top: 15px; height: 350px; overflow-y: auto; text-align: left; }
-        .history-item { 
-            background: #f8f9fa; margin-bottom: 10px; padding: 15px; border-radius: 12px;
-            display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--success-green);
-        }
-
-        /* ログイン */
-        #login-screen { position: fixed; inset: 0; background: white; z-index: 5000; display: flex; align-items: center; justify-content: center; }
-        .login-box { width: 450px; padding: 50px; text-align: center; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); }
-        .login-input { width: 100%; padding: 20px; border: 2px solid #eee; border-radius: 15px; margin-bottom: 20px; font-size: 1.2rem; box-sizing: border-box; }
+        body { font-family: sans-serif; background: #0033ff; color: white; text-align: center; margin: 0; }
+        .main { background: white; color: #333; margin: 20px; border-radius: 20px; padding: 20px; }
+        #qr-canvas { width: 100%; max-width: 400px; border-radius: 10px; margin-bottom: 20px; }
+        .btn { background: #0033ff; color: white; border: none; padding: 20px; width: 100%; border-radius: 10px; font-size: 1.2rem; font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <div id="login-screen">
-        <div class="login-box">
-            <div style="font-size: 3.5rem; font-weight: 900; color: var(--shop-blue); font-style: italic; margin-bottom: 10px;">SouPey Biz</div>
-            <p style="color:#888; margin-bottom: 40px;">加盟店レジ端末：ログイン</p>
-            <input type="text" id="shop-name" class="login-input" placeholder="店舗ID">
-            <input type="password" id="shop-pass" class="login-input" placeholder="パスワード">
-            <button class="btn-scan" style="width: 100%; padding: 15px; font-size: 1.5rem;" onclick="doLogin()">レジを起動</button>
-        </div>
-    </div>
-
-    <div class="header">
-        <div class="header-title">SouPey Biz</div>
-        <div id="shop-display" style="font-size: 1.3rem; background: rgba(255,255,255,0.2); padding: 8px 25px; border-radius: 30px;">未ログイン</div>
-    </div>
-
-    <div class="content">
-        <div class="left-panel">
-            <div class="main-card">
-                <div id="status-text" style="font-size: 1.8rem; margin-bottom: 30px; color: #444;">お客様の支払いQRをスキャン</div>
-                <button class="btn-scan" id="scan-btn" onclick="startScan()">支払いをスキャン</button>
-                <canvas id="qr-canvas"></canvas>
-                <button id="cancel-btn" style="display:none; margin-top:25px; color:#999; border:none; background:none; cursor:pointer; font-size:1.2rem;" onclick="location.reload()">スキャンを中止</button>
-            </div>
-        </div>
-
-        <div class="right-panel">
-            <div class="side-card">
-                <div class="stat-label">現在の店舗売上残高</div>
-                <div class="stat-value">¥ <span id="bal-display">0</span></div>
-            </div>
-            <div class="side-card" style="flex: 1;">
-                <div class="stat-label">直近の支払い受理履歴</div>
-                <div id="history" class="history-list">
-                    <div style="color:#ccc; text-align:center; margin-top:50px;">履歴はありません</div>
-                </div>
-                <button onclick="localStorage.clear(); location.reload();" style="margin-top:20px; color:#ddd; border:none; background:none; cursor:pointer;">ログアウト</button>
-            </div>
-        </div>
+    <h1>SouPey Biz</h1>
+    <div class="main">
+        <p id="status">スキャン待機中</p>
+        <button class="btn" id="start-btn" onclick="startScan()">スキャン開始</button>
+        <canvas id="qr-canvas" style="display:none;"></canvas>
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxVthSAwXkOLdT51c8JecC-dCbbdjpriz0OP7P9YSBp8rZxuNQ7AG3NK2TkPZ52nAM4og/exec";
-        let myShopName = localStorage.getItem('pp_shop');
-
-        window.onload = () => {
-            if (myShopName) {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('shop-display').innerText = "店舗： " + myShopName;
-                updateBalance();
-            }
-        };
-
-        function doLogin() {
-            const name = document.getElementById('shop-name').value;
-            const pass = document.getElementById('shop-pass').value;
-            fetch(`${GAS_URL}?name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&action=login`)
-                .then(res => res.json()).then(data => {
-                    if (data.status === "success") {
-                        localStorage.setItem('pp_shop', data.name);
-                        location.reload();
-                    } else { alert("ログイン失敗。店舗情報を確認してください。"); }
-                });
-        }
-
-        function updateBalance() {
-            fetch(`${GAS_URL}?name=${encodeURIComponent(myShopName)}&action=login&pass=SKIP`)
-                .then(res => res.json()).then(data => {
-                    if (data.status === "success") {
-                        document.getElementById('bal-display').innerText = Number(data.balance).toLocaleString();
-                    }
-                });
-        }
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwu7LVX0uWWSFrDKofN2_gKmj8eTI1HX9sFl2AihIsJLMMWOoy7GwOAyukE8WiO6-_IrA/exec";
+        let shopName = localStorage.getItem('pp_shop') || "shop1"; 
 
         function startScan() {
             const video = document.createElement("video");
             const canvas = document.getElementById("qr-canvas");
             const ctx = canvas.getContext("2d");
-            const btn = document.getElementById("scan-btn");
-
             navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => {
                 video.srcObject = s; video.setAttribute("playsinline", true); video.play();
-                canvas.style.display = "block";
-                btn.style.display = "none";
-                document.getElementById("cancel-btn").style.display = "block";
-
+                document.getElementById("start-btn").style.display = "none";
+                document.getElementById("qr-canvas").style.display = "block";
                 const tick = () => {
                     if (video.readyState === video.HAVE_ENOUGH_DATA) {
                         canvas.height = video.videoHeight; canvas.width = video.videoWidth;
                         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                         const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
                         if (code) {
-                            try {
-                                const d = JSON.parse(code.data);
-                                if (d.amt && d.sender) {
-                                    video.srcObject.getTracks().forEach(t => t.stop());
-                                    executePayment(d.amt, d.sender);
-                                }
-                            } catch(e) { }
+                            const d = JSON.parse(code.data);
+                            video.srcObject.getTracks().forEach(t => t.stop());
+                            processData(d);
                             return;
                         }
                     }
@@ -178,20 +50,19 @@
             });
         }
 
-        function executePayment(amount, customerName) {
-            document.getElementById('status-text').innerText = "支払い処理中...";
-            fetch(`${GAS_URL}?name=${encodeURIComponent(myShopName)}&target=${encodeURIComponent(customerName)}&amount=${amount}&action=pay_process`)
-                .then(res => res.json()).then(data => {
-                    if (data.status === "success") {
-                        speechSynthesis.speak(new SpeechSynthesisUtterance("ソウペイ！支払い完了"));
-                        alert(`${customerName}様より ${amount}円 受理しました`);
-                        location.reload();
-                    } else {
-                        alert("決済エラー: " + data.message);
-                        location.reload();
-                    }
+        function processData(d) {
+            const action = (d.t === "c") ? "charge" : "pay_process";
+            const msg = (d.t === "c") ? `${d.s}様へ ${d.a}円チャージしますか？` : `${d.s}様から ${d.a}円受け取りますか？`;
+            
+            if(confirm(msg)) {
+                fetch(`${GAS_URL}?name=${encodeURIComponent(shopName)}&target=${encodeURIComponent(d.s)}&amount=${d.a}&usePt=${d.pt}&action=${action}`)
+                .then(res => res.json()).then(res => {
+                    alert(res.status === "success" ? "完了！" : "エラー: " + res.message);
+                    location.reload();
                 });
+            } else { location.reload(); }
         }
     </script>
 </body>
 </html>
+
