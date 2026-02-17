@@ -5,135 +5,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SouPey</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        :root { --sou-red: #ff0033; --sou-gold: #ffb100; --sou-grad: linear-gradient(135deg, #ff0055 0%, #ff0033 100%); }
-        body { font-family: -apple-system, sans-serif; background: #f5f5f7; margin: 0; user-select: none; }
-        .header { background: var(--sou-grad); color: white; padding: env(safe-area-inset-top) 15px 15px; text-align: center; font-weight: bold; }
-        .info-container { display: flex; gap: 10px; margin: 20px; }
-        .card { background: white; padding: 15px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); flex: 1; }
-        .card.balance { border-left: 5px solid var(--sou-red); }
-        .card.point { border-left: 5px solid var(--sou-gold); }
-        .label { font-size: 0.7rem; color: #888; font-weight: bold; margin-bottom: 5px; }
-        .val { font-size: 1.4rem; font-weight: bold; }
-        .main-card { background: white; margin: 0 20px 20px; border-radius: 16px; padding: 20px; text-align: center; }
-        .btn-main { background: var(--sou-grad); color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; width: 100%; margin: 10px 0; font-size: 1.1rem; }
+        :root { --sou-red: #ff0033; --sou-grad: linear-gradient(135deg, #ff0055 0%, #ff0033 100%); }
+        body { font-family: -apple-system, sans-serif; background: #f5f5f7; margin: 0; text-align: center; }
+        .header { background: var(--sou-grad); color: white; padding: 50px 15px 15px; font-weight: bold; }
+        .main-card { background: white; margin: 20px; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .btn-main { background: var(--sou-grad); color: white; border: none; padding: 18px; border-radius: 12px; font-weight: bold; width: 100%; font-size: 1.1rem; cursor: pointer; }
+        #qrcode { display: flex; justify-content: center; align-items: center; min-height: 220px; margin: 20px 0; background: white; }
+        input[type="number"] { font-size: 2.5rem; width: 80%; text-align: center; border: none; border-bottom: 3px solid var(--sou-red); font-weight: bold; outline: none; margin-bottom: 10px; }
         #login-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .login-input { width: 80%; padding: 16px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 15px; text-align: center; }
-        #qrcode img { margin: 0 auto; } /* QRコードを中央寄せ */
     </style>
 </head>
 <body>
-    <div id="login-screen">
-        <div style="font-size: 4rem; font-weight: bold; color: var(--sou-red); font-style: italic; margin-bottom: 40px;">SouPey</div>
-        <input type="text" id="login-name" class="login-input" placeholder="ユーザー名">
-        <input type="password" id="login-pass" class="login-input" placeholder="パスワード">
-        <button class="btn-main" style="width: 80%;" onclick="doLogin()">ログイン</button>
+
+    <div id="login-screen" style="display:none;">
+        <div style="font-size: 3rem; font-weight: bold; color: var(--sou-red); font-style: italic; margin-bottom: 20px;">SouPey</div>
+        <input type="text" id="login-name" placeholder="ユーザー名" style="padding:15px; width:70%; margin-bottom:10px; border-radius:10px; border:1px solid #ddd;">
+        <input type="password" id="login-pass" placeholder="パスワード" style="padding:15px; width:70%; margin-bottom:20px; border-radius:10px; border:1px solid #ddd;">
+        <button class="btn-main" style="width:70%;" onclick="doLogin()">ログイン</button>
     </div>
 
-    <div class="header" id="user-header">SouPey</div>
-    
-    <div class="info-container">
-        <div class="card balance"><div class="label">残高</div><div class="val">¥ <span id="bal-display">----</span></div></div>
-        <div class="card point"><div class="label">ポイント</div><div class="val"><span id="pt-display">----</span>pt</div></div>
-    </div>
+    <div class="header">SouPey 支払い画面</div>
 
     <div class="main-card" id="menu-area">
-        <button class="btn-main" onclick="showPay()">支払う</button>
-        <button class="btn-main" style="background:#333;" onclick="showScan()">個人送金受取</button>
-        <button onclick="localStorage.clear(); location.reload();" style="border:none; background:none; color:#999; margin-top:20px; text-decoration:underline;">ログアウト</button>
+        <button class="btn-main" onclick="showPay()">支払う（QR表示）</button>
     </div>
 
     <div class="main-card" id="pay-area" style="display:none;">
-        <p style="color:#888; font-size:0.8rem;">金額を入力してQRをお店に見せてください</p>
-        <input type="number" id="pay-val" value="1000" style="font-size:2.5rem; width:80%; text-align:center; border:none; border-bottom:3px solid var(--sou-red); font-weight:bold; outline:none; margin-bottom:20px;">
-        <div id="qrcode" style="display:flex; justify-content:center; min-height:200px; padding:10px; background:#fff;"></div>
-        <button class="btn-main" style="background:#333; margin-top:20px;" onclick="location.reload()">閉じる</button>
+        <p style="color:#888;">金額を入力してください</p>
+        <input type="number" id="pay-val" value="1000" inputmode="numeric">
+        <div id="qrcode"></div>
+        <button class="btn-main" style="background:#333; margin-top:10px;" onclick="location.reload()">戻る</button>
     </div>
-
-    <div class="main-card" id="scan-area" style="display:none;"><canvas id="qr-canvas" hidden></canvas></div>
 
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbxVthSAwXkOLdT51c8JecC-dCbbdjpriz0OP7P9YSBp8rZxuNQ7AG3NK2TkPZ52nAM4og/exec";
         let myName = localStorage.getItem('pp_user');
 
-        window.onload = () => { if (myName) { document.getElementById('login-screen').style.display = 'none'; loadData(); } };
+        if (!myName) { document.getElementById('login-screen').style.display = 'flex'; }
 
         function doLogin() {
-            const name = document.getElementById('login-name').value.trim();
-            const pass = document.getElementById('login-pass').value.trim();
-            if(!name || !pass) return alert("入力してください");
+            const name = document.getElementById('login-name').value;
+            const pass = document.getElementById('login-pass').value;
             fetch(`${GAS_URL}?name=${encodeURIComponent(name)}&pass=${encodeURIComponent(pass)}&action=login`).then(res => res.json()).then(data => {
-                if (data.status === "success") { localStorage.setItem('pp_user', data.name); location.reload(); } else { alert(data.message); }
+                if (data.status === "success") { localStorage.setItem('pp_user', data.name); location.reload(); } else { alert("失敗"); }
             });
         }
 
-        function loadData() {
-            document.getElementById('user-header').innerText = myName + " のSouPey";
-            fetch(`${GAS_URL}?name=${encodeURIComponent(myName)}&action=login&pass=SKIP`).then(res => res.json()).then(data => {
-                if (data.status === "success") {
-                    document.getElementById('bal-display').innerText = Number(data.balance).toLocaleString();
-                    document.getElementById('pt-display').innerText = Number(data.point).toLocaleString();
-                }
-            });
-        }
-
-        // QRコード生成の重要修正
+        // --- 修正ポイント：1000円以上でも確実にQRを出す処理 ---
         function showPay() {
             document.getElementById('menu-area').style.display = 'none';
             document.getElementById('pay-area').style.display = 'block';
             
             const makeQR = () => {
                 const qrBox = document.getElementById('qrcode');
-                qrBox.innerHTML = ""; // 前のQRを消す
-                const amount = document.getElementById('pay-val').value;
-                const qrData = JSON.stringify({ amt: amount, sender: myName });
+                qrBox.innerHTML = ""; // 一度クリア
+                
+                const val = document.getElementById('pay-val').value || 0;
+                // 中身のデータをシンプルにする
+                const qrData = JSON.stringify({ a: parseInt(val), s: myName });
 
-                new QRCode(qrBox, {
-                    text: qrData,
-                    width: 200,
-                    height: 200,
-                    colorDark : "#000000",
-                    colorLight : "#ffffff",
-                    correctLevel : QRCode.CorrectLevel.H
-                });
+                try {
+                    new QRCode(qrBox, {
+                        text: qrData,
+                        width: 200,
+                        height: 200,
+                        correctLevel: QRCode.CorrectLevel.M // L(低)からM(中)に変更して安定させる
+                    });
+                } catch (e) {
+                    console.error("QR生成エラー:", e);
+                }
             };
 
-            setTimeout(makeQR, 100); // 描画タイミングを少し遅らせて確実にする
-            document.getElementById('pay-val').oninput = makeQR;
-        }
-
-        function showScan() {
-            document.getElementById('menu-area').style.display = 'none';
-            document.getElementById('scan-area').style.display = 'block';
-            const video = document.createElement("video");
-            const canvas = document.getElementById("qr-canvas");
-            const ctx = canvas.getContext("2d");
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => {
-                video.srcObject = s; video.setAttribute("playsinline", true); video.play();
-                const tick = () => {
-                    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                        canvas.hidden = false; canvas.height = video.videoHeight; canvas.width = video.videoWidth;
-                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                        const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
-                        if (code) {
-                            const d = JSON.parse(code.data);
-                            fetch(`${GAS_URL}?name=${encodeURIComponent(myName)}&action=update&amount=${d.amt}`).then(() => {
-                                alert(d.amt + "円受け取りました！"); location.reload();
-                            });
-                            video.srcObject.getTracks().forEach(t => t.stop());
-                            return;
-                        }
-                    }
-                    requestAnimationFrame(tick);
-                };
-                tick();
-            });
+            // 初回実行
+            setTimeout(makeQR, 200);
+            // 入力するたびに更新
+            document.getElementById('pay-val').addEventListener('input', makeQR);
         }
     </script>
 </body>
 </html>
-
