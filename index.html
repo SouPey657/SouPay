@@ -22,7 +22,7 @@
         /* メイン画面 */
         .top-header { background: white; padding: 45px 15px 10px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .main-wallet-card { background: white; margin: 10px 15px; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; }
-        #qr-img { width: 170px; height: 170px; margin: 10px 0; }
+        #qr-img { width: 170px; height: 170px; margin: 10px 0; border: 1px solid #eee; padding: 5px; }
 
         .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; background: white; margin: 0 15px; padding: 15px 5px; border-radius: 20px; }
         .action-item { text-align: center; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
@@ -31,7 +31,7 @@
         .balance-card { background: white; margin: 15px; padding: 15px 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; }
         .bal-val { font-size: 1.4rem; font-weight: 900; }
 
-        /* 下部ナビ（5つのボタンに調整） */
+        /* ナビバー */
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 10px 0 25px; z-index: 100; }
         .nav-item { text-align: center; font-size: 0.6rem; color: #888; flex: 1; cursor: pointer; }
         .nav-item i { font-size: 1.5rem; display: block; margin-bottom: 3px; }
@@ -63,12 +63,13 @@
     <div id="main-app" style="display:none;">
         <div class="top-header">
             <div><i class="fas fa-bars"></i> <span id="user-display">---</span></div>
-            <i class="far fa-bell"></i>
+            <i class="far fa-bell" onclick="loadData()"></i>
         </div>
         <div class="main-wallet-card">
-            <div style="font-size:0.7rem; color:#888;"><i class="fas fa-shield-alt"></i> SouPayセキュア決済</div>
+            <div id="qr-label" style="font-size:0.7rem; color:#888;"><i class="fas fa-shield-alt"></i> SouPayセキュア決済</div>
             <img id="qr-img" src="" alt="QR">
             <div id="qr-info" style="font-size:0.9rem; font-weight:bold; color:var(--pay-red);">¥ 1,000 設定中</div>
+            <div style="font-size:0.6rem; color:#bbb; margin-top:5px;">5分間有効</div>
         </div>
         
         <div class="action-grid">
@@ -104,11 +105,13 @@
             <span style="font-size:1.5rem;">¥</span>
             <input type="number" id="input-amount" value="1000">
         </div>
-        <button id="modal-confirm-btn" class="btn btn-red" style="width:90%; margin:0 5%;" onclick="applySettings()">確定する</button>
+        <button id="modal-confirm-btn" class="btn btn-red" style="width:90%; margin:0 5%;" onclick="applySettings()">QRを表示する</button>
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwzPTdXvPIAnNES3OjB5ImiWLUpIWf2FYuZKHlzpoeWM7fD7trTJDM_Vf0bDqrd4RaeTg/exec";
+        // あなたのGASのURL
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbzeY_uka103huKesVTo4-ZzQlt8hAlf1IH7FJtTjkz17vEqcCzpDF5T-zGaa0V77GXgbA/exec";
+        
         let isSignupMode = false;
         let myName = localStorage.getItem('sp_user');
         let myCredId = localStorage.getItem('sp_credId');
@@ -172,8 +175,8 @@
 
         function openModal(m) {
             mode = m;
-            document.getElementById('modal-title').innerText = m === 'pay' ? "支払い金額設定" : "チャージ金額";
-            document.getElementById('modal-confirm-btn').innerText = m === 'pay' ? "設定を適用する" : "今すぐチャージする";
+            document.getElementById('modal-title').innerText = m === 'pay' ? "支払い金額設定" : "チャージ依頼金額";
+            document.getElementById('modal-confirm-btn').innerText = m === 'pay' ? "支払いQRを表示" : "チャージ用QRを表示";
             document.getElementById('overlay').style.display = "block";
             document.getElementById('pay-modal').classList.add('open');
         }
@@ -183,28 +186,34 @@
             document.getElementById('pay-modal').classList.remove('open');
         }
 
-        async function applySettings() {
+        function applySettings() {
             const amt = parseInt(document.getElementById('input-amount').value);
             if (!amt || amt <= 0) return alert("金額を正しく入力してください");
-
-            if (mode === 'charge') {
-                document.getElementById('modal-confirm-btn').innerText = "処理中...";
-                const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "charge", name: myName, amount: amt })});
-                const d = await res.json();
-                if (d.status === "success") {
-                    alert(`¥${amt.toLocaleString()} チャージが完了しました！`);
-                    document.getElementById('bal-display').innerText = Number(d.newBalance).toLocaleString();
-                }
-            }
+            
             updateQR();
+            
+            if (mode === 'charge') {
+                document.getElementById('qr-label').innerHTML = `<i class="fas fa-plus-circle"></i> SouPayチャージ受付`;
+                document.getElementById('qr-info').innerText = `¥ ${amt.toLocaleString()} のチャージ待ち`;
+                alert("このQRを店舗側に提示してください。");
+            } else {
+                document.getElementById('qr-label').innerHTML = `<i class="fas fa-shield-alt"></i> SouPayセキュア決済`;
+                document.getElementById('qr-info').innerText = `¥ ${amt.toLocaleString()} 設定中`;
+            }
             closeModal();
         }
 
         function updateQR() {
             const amt = document.getElementById('input-amount').value || 0;
-            const data = JSON.stringify({ t: 'p', a: parseInt(amt), s: myName });
-            document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data)}`;
-            document.getElementById('qr-info').innerText = `¥ ${Number(amt).toLocaleString()} 設定中`;
+            // QRの中身に「タイプ」を込める (t: p=payment, c=charge)
+            const qrData = {
+                t: mode === 'pay' ? 'p' : 'c',
+                a: parseInt(amt),
+                s: myName,
+                time: Date.now()
+            };
+            const url = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(JSON.stringify(qrData))}`;
+            document.getElementById('qr-img').src = url;
         }
 
         function logout() { if(confirm("ログアウトしますか？")){ localStorage.clear(); location.reload(); } }
