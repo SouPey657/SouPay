@@ -10,27 +10,34 @@
         :root { --pay-red: #ff0033; --bg-gray: #f4f4f6; }
         body { font-family: -apple-system, sans-serif; background: var(--bg-gray); margin: 0; color: #333; user-select: none; }
         
+        /* 認証画面 */
         #login-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
         .login-logo { font-size: 3.5rem; font-weight: 900; color: var(--pay-red); font-style: italic; margin-bottom: 30px; letter-spacing: -2px; }
         .login-input { width: 80%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 12px; font-size: 1rem; outline: none; }
-        .btn { width: 85%; padding: 16px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; font-size: 1rem; margin-bottom: 10px; transition: 0.2s; }
+        .btn { width: 85%; padding: 16px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; font-size: 1rem; margin-bottom: 10px; }
         .btn-red { background: var(--pay-red); color: white; }
         .btn-gray { background: #eee; color: #333; }
         .toggle-link { color: #888; font-size: 0.8rem; margin-top: 15px; text-decoration: underline; cursor: pointer; }
 
-        /* メイン画面・ヘッダー・カード等は前回のデザインを維持 */
+        /* メイン画面 */
         .top-header { background: white; padding: 45px 15px 10px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .main-wallet-card { background: white; margin: 10px 15px; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; }
         #qr-img { width: 170px; height: 170px; margin: 10px 0; }
+
         .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; background: white; margin: 0 15px; padding: 15px 5px; border-radius: 20px; }
         .action-item { text-align: center; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
         .action-icon { width: 50px; height: 50px; background: #fff1f3; color: var(--pay-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 1.4rem; }
+
         .balance-card { background: white; margin: 15px; padding: 15px 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; }
         .bal-val { font-size: 1.4rem; font-weight: 900; }
+
+        /* 下部ナビ（5つのボタンに調整） */
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 10px 0 25px; z-index: 100; }
         .nav-item { text-align: center; font-size: 0.6rem; color: #888; flex: 1; cursor: pointer; }
         .nav-item i { font-size: 1.5rem; display: block; margin-bottom: 3px; }
-        .nav-pay-btn { background: var(--pay-red); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -35px; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .nav-pay-btn { background: var(--pay-red); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -35px; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; }
+
+        /* モーダル */
         #pay-modal { position: fixed; bottom: 0; width: 100%; background: white; border-radius: 25px 25px 0 0; transform: translateY(100%); transition: 0.3s; z-index: 1001; padding: 20px 0 40px; }
         #pay-modal.open { transform: translateY(0); }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1000; }
@@ -45,12 +52,10 @@
         <h2 id="auth-title" style="font-size: 1rem; color: #666; margin-bottom: 20px;">ログイン</h2>
         <input type="text" id="login-name" class="login-input" placeholder="ユーザー名">
         <input type="password" id="login-pass" class="login-input" placeholder="パスワード">
-        
         <button id="main-auth-btn" class="btn btn-red" onclick="handleAuth()">ログイン</button>
         <button id="pk-login-btn" class="btn btn-gray" onclick="doLogin('passkey')" style="display:none;">
             <i class="fas fa-fingerprint"></i> パスキーでログイン
         </button>
-        
         <div id="auth-toggle" class="toggle-link" onclick="toggleAuthMode()">新規アカウント作成はこちら</div>
         <p id="login-error" style="color:red; font-size:0.8rem; margin-top: 10px;"></p>
     </div>
@@ -65,36 +70,41 @@
             <img id="qr-img" src="" alt="QR">
             <div id="qr-info" style="font-size:0.9rem; font-weight:bold; color:var(--pay-red);">¥ 1,000 設定中</div>
         </div>
+        
         <div class="action-grid">
-            <div class="action-item" onclick="alert('スキャン')"><div class="action-icon"><i class="fas fa-camera"></i></div>スキャン</div>
+            <div class="action-item"><div class="action-icon"><i class="fas fa-camera"></i></div>スキャン</div>
             <div class="action-item"><div class="action-icon"><i class="fas fa-paper-plane"></i></div>送る</div>
             <div class="action-item" onclick="registerPasskey()"><div class="action-icon"><i class="fas fa-key"></i></div>パスキー登録</div>
             <div class="action-item" onclick="openModal('charge')"><div class="action-icon"><i class="fas fa-plus-circle"></i></div>チャージ</div>
         </div>
+
         <div class="balance-card">
-            <span>ポイント</span>
+            <span>SouPayポイント</span>
             <span class="bal-val"><span id="pt-display">0</span> pt</span>
         </div>
         <div class="balance-card" style="margin-top:-5px;">
             <span>SouPay残高</span>
             <span class="bal-val">¥ <span id="bal-display">0</span></span>
         </div>
+
         <div class="nav-bar">
             <div class="nav-item" style="color:var(--pay-red);" onclick="location.reload()"><i class="fas fa-home"></i>ホーム</div>
-            <div class="nav-item" onclick="window.location.href='https://docs.google.com/spreadsheets/d/1vN4H1eO4H5_VscfGv2m-68_70oAit8-71e-S5D2Y3pQ/edit'"><i class="fas fa-history"></i>履歴</div>
+            <div class="nav-item" onclick="location.href='https://sougomassage-smart.webnode.jp/'"><i class="fas fa-globe"></i>サイト</div>
             <div class="nav-pay-btn" onclick="openModal('pay')"><i class="fas fa-qrcode"></i></div>
-            <div class="nav-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i>終了</div>
+            <div class="nav-item" onclick="window.location.href='https://docs.google.com/spreadsheets/d/1vN4H1eO4H5_VscfGv2m-68_70oAit8-71e-S5D2Y3pQ/edit'"><i class="fas fa-history"></i>履歴</div>
+            <div class="nav-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i>ログアウト</div>
         </div>
     </div>
 
     <div class="modal-overlay" id="overlay" onclick="closeModal()"></div>
     <div id="pay-modal">
         <div style="width:40px; height:5px; background:#ddd; border-radius:5px; margin:0 auto 20px;"></div>
+        <h3 id="modal-title" style="text-align:center;">金額を入力</h3>
         <div class="amount-input-area">
             <span style="font-size:1.5rem;">¥</span>
             <input type="number" id="input-amount" value="1000">
         </div>
-        <button class="btn btn-red" style="width:90%; margin:0 5%;" onclick="applySettings()">設定を適用</button>
+        <button id="modal-confirm-btn" class="btn btn-red" style="width:90%; margin:0 5%;" onclick="applySettings()">確定する</button>
     </div>
 
     <script>
@@ -102,6 +112,7 @@
         let isSignupMode = false;
         let myName = localStorage.getItem('sp_user');
         let myCredId = localStorage.getItem('sp_credId');
+        let mode = "pay";
 
         window.onload = () => {
             if(myCredId) document.getElementById('pk-login-btn').style.display = 'block';
@@ -117,7 +128,6 @@
             document.getElementById('auth-title').innerText = isSignupMode ? "新規アカウント作成" : "ログイン";
             document.getElementById('main-auth-btn').innerText = isSignupMode ? "アカウントを作成する" : "ログイン";
             document.getElementById('auth-toggle').innerText = isSignupMode ? "ログインはこちら" : "新規アカウント作成はこちら";
-            document.getElementById('pk-login-btn').style.display = (isSignupMode || !myCredId) ? 'none' : 'block';
         }
 
         async function handleAuth() {
@@ -126,49 +136,32 @@
             if(!n || !p) return alert("入力してください");
 
             const action = isSignupMode ? "signup" : "login";
-            const payload = { action: action, name: n, pass: p, type: "password" };
-
             try {
-                const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
+                const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: action, name: n, pass: p, type: "password" })});
                 const d = await res.json();
                 if(d.status === "success") {
-                    if(isSignupMode) {
-                        alert(d.message);
-                        toggleAuthMode();
-                    } else {
-                        localStorage.setItem('sp_user', d.name);
-                        location.reload();
-                    }
+                    if(isSignupMode) { alert(d.message); toggleAuthMode(); }
+                    else { localStorage.setItem('sp_user', d.name); location.reload(); }
                 } else { alert(d.message); }
-            } catch(e) { alert("通信エラー"); }
+            } catch(e) { alert("接続エラー"); }
         }
 
         async function doLogin(type) {
-            let payload = { action: "login", name: myName, type: "passkey", credId: myCredId };
-            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
+            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "login", name: myName, type: "passkey", credId: myCredId })});
             const d = await res.json();
             if(d.status === "success") { location.reload(); }
         }
 
         async function registerPasskey() {
             const dummyId = "SP-" + Math.random().toString(36).slice(2);
-            const res = await fetch(GAS_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "register_passkey", name: myName, credId: dummyId })
-            });
+            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "register_passkey", name: myName, credId: dummyId })});
             const d = await res.json();
-            if(d.status === "success") {
-                localStorage.setItem('sp_credId', dummyId);
-                alert("パスキーを登録しました。");
-            }
+            if(d.status === "success") { localStorage.setItem('sp_credId', dummyId); alert("パスキーを登録しました。"); }
         }
 
         async function loadData() {
             document.getElementById('user-display').innerText = myName + " 様";
-            const res = await fetch(GAS_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "login", name: myName, type: "passkey", credId: myCredId })
-            });
+            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "login", name: myName, type: "passkey", credId: myCredId })});
             const d = await res.json();
             if(d.status === "success") {
                 document.getElementById('bal-display').innerText = Number(d.balance).toLocaleString();
@@ -178,21 +171,43 @@
         }
 
         function openModal(m) {
+            mode = m;
+            document.getElementById('modal-title').innerText = m === 'pay' ? "支払い金額設定" : "チャージ金額";
+            document.getElementById('modal-confirm-btn').innerText = m === 'pay' ? "設定を適用する" : "今すぐチャージする";
             document.getElementById('overlay').style.display = "block";
             document.getElementById('pay-modal').classList.add('open');
         }
+
         function closeModal() {
             document.getElementById('overlay').style.display = "none";
             document.getElementById('pay-modal').classList.remove('open');
         }
-        function applySettings() { updateQR(); closeModal(); }
+
+        async function applySettings() {
+            const amt = parseInt(document.getElementById('input-amount').value);
+            if (!amt || amt <= 0) return alert("金額を正しく入力してください");
+
+            if (mode === 'charge') {
+                document.getElementById('modal-confirm-btn').innerText = "処理中...";
+                const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action: "charge", name: myName, amount: amt })});
+                const d = await res.json();
+                if (d.status === "success") {
+                    alert(`¥${amt.toLocaleString()} チャージが完了しました！`);
+                    document.getElementById('bal-display').innerText = Number(d.newBalance).toLocaleString();
+                }
+            }
+            updateQR();
+            closeModal();
+        }
+
         function updateQR() {
             const amt = document.getElementById('input-amount').value || 0;
             const data = JSON.stringify({ t: 'p', a: parseInt(amt), s: myName });
             document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data)}`;
             document.getElementById('qr-info').innerText = `¥ ${Number(amt).toLocaleString()} 設定中`;
         }
-        function logout() { localStorage.clear(); location.reload(); }
+
+        function logout() { if(confirm("ログアウトしますか？")){ localStorage.clear(); location.reload(); } }
     </script>
 </body>
 </html>
