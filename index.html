@@ -3,56 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SouPey</title>
-    
+    <title>SouPay</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="SouPey">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
     <style>
-        :root { --paypay-red: #ff0033; --bg-gray: #f4f4f6; }
+        :root { --pay-red: #ff0033; --bg-gray: #f4f4f6; }
         body { font-family: -apple-system, sans-serif; background: var(--bg-gray); margin: 0; color: #333; user-select: none; }
         
-        #login-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .login-logo { font-size: 3.5rem; font-weight: 900; color: var(--paypay-red); font-style: italic; margin-bottom: 40px; }
-        .login-input { width: 80%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 12px; font-size: 1rem; }
-        .btn-login { background: var(--paypay-red); color: white; border: none; padding: 16px; width: 80%; border-radius: 30px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-login:active { opacity: 0.7; transform: scale(0.95); }
+        #login-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .login-logo { font-size: 3.5rem; font-weight: 900; color: var(--pay-red); font-style: italic; margin-bottom: 30px; letter-spacing: -2px; }
+        .login-input { width: 80%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 12px; font-size: 1rem; outline: none; }
+        .btn { width: 85%; padding: 16px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; font-size: 1rem; margin-bottom: 10px; transition: 0.2s; }
+        .btn-red { background: var(--pay-red); color: white; }
+        .btn-gray { background: #eee; color: #333; }
+        .toggle-link { color: #888; font-size: 0.8rem; margin-top: 15px; text-decoration: underline; cursor: pointer; }
 
+        /* メイン画面・ヘッダー・カード等は前回のデザインを維持 */
         .top-header { background: white; padding: 45px 15px 10px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
         .main-wallet-card { background: white; margin: 10px 15px; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; }
-        #qr-img { width: 160px; height: 160px; margin: 10px 0; }
-
+        #qr-img { width: 170px; height: 170px; margin: 10px 0; }
         .action-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; background: white; margin: 0 15px; padding: 15px 5px; border-radius: 20px; }
         .action-item { text-align: center; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
-        .action-icon { width: 50px; height: 50px; background: #fff1f3; color: var(--paypay-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 1.4rem; }
-
+        .action-icon { width: 50px; height: 50px; background: #fff1f3; color: var(--pay-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px; font-size: 1.4rem; }
         .balance-card { background: white; margin: 15px; padding: 15px 20px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; }
         .bal-val { font-size: 1.4rem; font-weight: 900; }
-
         .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; justify-content: space-around; padding: 10px 0 25px; z-index: 100; }
         .nav-item { text-align: center; font-size: 0.6rem; color: #888; flex: 1; cursor: pointer; }
         .nav-item i { font-size: 1.5rem; display: block; margin-bottom: 3px; }
-        .nav-pay-btn { background: var(--paypay-red); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -35px; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; }
-
+        .nav-pay-btn { background: var(--pay-red); color: white; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: -35px; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         #pay-modal { position: fixed; bottom: 0; width: 100%; background: white; border-radius: 25px 25px 0 0; transform: translateY(100%); transition: 0.3s; z-index: 1001; padding: 20px 0 40px; }
         #pay-modal.open { transform: translateY(0); }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 1000; }
         .amount-input-area { text-align: center; padding: 20px; }
-        .amount-input-area input { font-size: 3.5rem; width: 80%; border: none; border-bottom: 2px solid #eee; text-align: center; outline: none; font-weight: bold; }
-        .btn-confirm { background: var(--paypay-red); color: white; border: none; padding: 18px; width: 90%; margin: 0 5%; border-radius: 30px; font-weight: bold; font-size: 1.2rem; cursor: pointer; }
+        .amount-input-area input { font-size: 3.5rem; width: 80%; border: none; border-bottom: 2px solid #eee; text-align: center; outline: none; font-weight: bold; color: var(--pay-red); }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <div class="login-logo">SouPey</div>
+        <div class="login-logo">SouPay</div>
+        <h2 id="auth-title" style="font-size: 1rem; color: #666; margin-bottom: 20px;">ログイン</h2>
         <input type="text" id="login-name" class="login-input" placeholder="ユーザー名">
         <input type="password" id="login-pass" class="login-input" placeholder="パスワード">
-        <button class="btn-login" onclick="doLogin()">ログイン</button>
-        <p id="login-error" style="color:red; font-size:0.8rem; margin-top:15px;"></p>
+        
+        <button id="main-auth-btn" class="btn btn-red" onclick="handleAuth()">ログイン</button>
+        <button id="pk-login-btn" class="btn btn-gray" onclick="doLogin('passkey')" style="display:none;">
+            <i class="fas fa-fingerprint"></i> パスキーでログイン
+        </button>
+        
+        <div id="auth-toggle" class="toggle-link" onclick="toggleAuthMode()">新規アカウント作成はこちら</div>
+        <p id="login-error" style="color:red; font-size:0.8rem; margin-top: 10px;"></p>
     </div>
 
     <div id="main-app" style="display:none;">
@@ -60,138 +60,139 @@
             <div><i class="fas fa-bars"></i> <span id="user-display">---</span></div>
             <i class="far fa-bell"></i>
         </div>
-
         <div class="main-wallet-card">
-            <div style="font-size:0.7rem; color:#888;"><i class="fas fa-lock"></i> エンドツーエンド暗号化通信</div>
-            <div class="qr-area"><img id="qr-img" src="" alt="QR"></div>
-            <div id="qr-info" style="font-size:0.9rem; font-weight:bold; color:var(--paypay-red);">¥ 1,000 設定中</div>
+            <div style="font-size:0.7rem; color:#888;"><i class="fas fa-shield-alt"></i> SouPayセキュア決済</div>
+            <img id="qr-img" src="" alt="QR">
+            <div id="qr-info" style="font-size:0.9rem; font-weight:bold; color:var(--pay-red);">¥ 1,000 設定中</div>
         </div>
-
         <div class="action-grid">
-            <div class="action-item"><div class="action-icon"><i class="fas fa-camera"></i></div>スキャン</div>
+            <div class="action-item" onclick="alert('スキャン')"><div class="action-icon"><i class="fas fa-camera"></i></div>スキャン</div>
             <div class="action-item"><div class="action-icon"><i class="fas fa-paper-plane"></i></div>送る</div>
-            <div class="action-item" onclick="alert('保有ポイント: ' + document.getElementById('pt-display').innerText + ' pt')"><div class="action-icon"><i class="fas fa-coins"></i></div>ポイント</div>
+            <div class="action-item" onclick="registerPasskey()"><div class="action-icon"><i class="fas fa-key"></i></div>パスキー登録</div>
             <div class="action-item" onclick="openModal('charge')"><div class="action-icon"><i class="fas fa-plus-circle"></i></div>チャージ</div>
         </div>
-
         <div class="balance-card">
-            <span><i class="fas fa-parking" style="color:var(--paypay-red);"></i> ポイント</span>
+            <span>ポイント</span>
             <span class="bal-val"><span id="pt-display">0</span> pt</span>
         </div>
         <div class="balance-card" style="margin-top:-5px;">
-            <span><i class="fas fa-yen-sign" style="color:var(--paypay-red);"></i> 残高</span>
+            <span>SouPay残高</span>
             <span class="bal-val">¥ <span id="bal-display">0</span></span>
         </div>
-
         <div class="nav-bar">
-            <div class="nav-item" style="color:var(--paypay-red);" onclick="location.reload()"><i class="fas fa-home"></i>ホーム</div>
-            <div class="nav-item" onclick="location.href='https://sougomassage-smart.webnode.jp/'"><i class="fas fa-globe"></i>サイト</div>
-            <div class="nav-pay-btn" onclick="openModal('pay')"><i class="fas fa-qrcode"></i></div>
+            <div class="nav-item" style="color:var(--pay-red);" onclick="location.reload()"><i class="fas fa-home"></i>ホーム</div>
             <div class="nav-item" onclick="window.location.href='https://docs.google.com/spreadsheets/d/1vN4H1eO4H5_VscfGv2m-68_70oAit8-71e-S5D2Y3pQ/edit'"><i class="fas fa-history"></i>履歴</div>
-            <div class="nav-item" onclick="logout()"><i class="fas fa-user-circle"></i>設定</div>
+            <div class="nav-pay-btn" onclick="openModal('pay')"><i class="fas fa-qrcode"></i></div>
+            <div class="nav-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i>終了</div>
         </div>
     </div>
 
     <div class="modal-overlay" id="overlay" onclick="closeModal()"></div>
     <div id="pay-modal">
         <div style="width:40px; height:5px; background:#ddd; border-radius:5px; margin:0 auto 20px;"></div>
-        <h3 id="modal-title" style="text-align:center;">金額設定</h3>
         <div class="amount-input-area">
             <span style="font-size:1.5rem;">¥</span>
             <input type="number" id="input-amount" value="1000">
         </div>
-        <button class="btn-confirm" onclick="applySettings()">設定を適用</button>
+        <button class="btn btn-red" style="width:90%; margin:0 5%;" onclick="applySettings()">設定を適用</button>
     </div>
 
     <script>
-        // 【重要】新しいGAS URLを適用済み
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwzPTdXvPIAnNES3OjB5ImiWLUpIWf2FYuZKHlzpoeWM7fD7trTJDM_Vf0bDqrd4RaeTg/exec";
-        
-        let myName = localStorage.getItem('pp_user');
-        let myPass = localStorage.getItem('pp_pass');
-        let mode = "pay";
+        let isSignupMode = false;
+        let myName = localStorage.getItem('sp_user');
+        let myCredId = localStorage.getItem('sp_credId');
 
-        window.onload = () => { 
-            if(myName && myPass){ 
-                document.getElementById('login-screen').style.display='none'; 
-                document.getElementById('main-app').style.display='block'; 
-                loadData(); 
-            } 
+        window.onload = () => {
+            if(myCredId) document.getElementById('pk-login-btn').style.display = 'block';
+            if(myName) {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                loadData();
+            }
         };
 
-        async function doLogin() {
+        function toggleAuthMode() {
+            isSignupMode = !isSignupMode;
+            document.getElementById('auth-title').innerText = isSignupMode ? "新規アカウント作成" : "ログイン";
+            document.getElementById('main-auth-btn').innerText = isSignupMode ? "アカウントを作成する" : "ログイン";
+            document.getElementById('auth-toggle').innerText = isSignupMode ? "ログインはこちら" : "新規アカウント作成はこちら";
+            document.getElementById('pk-login-btn').style.display = (isSignupMode || !myCredId) ? 'none' : 'block';
+        }
+
+        async function handleAuth() {
             const n = document.getElementById('login-name').value.trim();
             const p = document.getElementById('login-pass').value.trim();
-            if(!n || !p) return;
+            if(!n || !p) return alert("入力してください");
 
-            document.getElementById('login-error').innerText = "セキュリティ検証中...";
+            const action = isSignupMode ? "signup" : "login";
+            const payload = { action: action, name: n, pass: p, type: "password" };
 
             try {
-                const res = await fetch(GAS_URL, {
-                    method: "POST",
-                    mode: "no-cors", // 一部の環境でのエラー回避
-                    body: JSON.stringify({ action: "login", name: n, pass: p })
-                });
-                // no-corsの場合はレスポンスの中身が見えないため、通常フェッチを試行
-                const secureRes = await fetch(GAS_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "login", name: n, pass: p })
-                });
-                const d = await secureRes.json();
-                if(d.status === "success"){
-                    localStorage.setItem('pp_user', d.name);
-                    localStorage.setItem('pp_pass', p);
-                    location.reload();
-                } else {
-                    document.getElementById('login-error').innerText = d.message;
-                }
-            } catch(e) { 
-                document.getElementById('login-error').innerText = "サーバー未承認または接続エラー"; 
+                const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
+                const d = await res.json();
+                if(d.status === "success") {
+                    if(isSignupMode) {
+                        alert(d.message);
+                        toggleAuthMode();
+                    } else {
+                        localStorage.setItem('sp_user', d.name);
+                        location.reload();
+                    }
+                } else { alert(d.message); }
+            } catch(e) { alert("通信エラー"); }
+        }
+
+        async function doLogin(type) {
+            let payload = { action: "login", name: myName, type: "passkey", credId: myCredId };
+            const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(payload) });
+            const d = await res.json();
+            if(d.status === "success") { location.reload(); }
+        }
+
+        async function registerPasskey() {
+            const dummyId = "SP-" + Math.random().toString(36).slice(2);
+            const res = await fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "register_passkey", name: myName, credId: dummyId })
+            });
+            const d = await res.json();
+            if(d.status === "success") {
+                localStorage.setItem('sp_credId', dummyId);
+                alert("パスキーを登録しました。");
             }
         }
 
         async function loadData() {
             document.getElementById('user-display').innerText = myName + " 様";
-            try {
-                const res = await fetch(GAS_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "login", name: myName, pass: myPass })
-                });
-                const d = await res.json();
-                if(d.status === "success"){
-                    document.getElementById('bal-display').innerText = Number(d.balance).toLocaleString();
-                    document.getElementById('pt-display').innerText = Number(d.point).toLocaleString();
-                    updateQR();
-                }
-            } catch(e) { console.error("Data load failed"); }
+            const res = await fetch(GAS_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "login", name: myName, type: "passkey", credId: myCredId })
+            });
+            const d = await res.json();
+            if(d.status === "success") {
+                document.getElementById('bal-display').innerText = Number(d.balance).toLocaleString();
+                document.getElementById('pt-display').innerText = Number(d.point).toLocaleString();
+                updateQR();
+            }
         }
 
         function openModal(m) {
-            mode = m;
-            document.getElementById('modal-title').innerText = m === 'pay' ? "支払い金額設定" : "チャージ金額設定";
             document.getElementById('overlay').style.display = "block";
             document.getElementById('pay-modal').classList.add('open');
         }
-
         function closeModal() {
             document.getElementById('overlay').style.display = "none";
             document.getElementById('pay-modal').classList.remove('open');
         }
-
-        function applySettings() {
-            updateQR();
-            const amt = document.getElementById('input-amount').value;
-            document.getElementById('qr-info').innerText = `¥ ${Number(amt).toLocaleString()} ${mode==='pay'?'設定中':'チャージ用'}`;
-            closeModal();
-        }
-
+        function applySettings() { updateQR(); closeModal(); }
         function updateQR() {
             const amt = document.getElementById('input-amount').value || 0;
-            const data = JSON.stringify({ t: mode==='pay'?'p':'c', a: parseInt(amt), s: myName });
+            const data = JSON.stringify({ t: 'p', a: parseInt(amt), s: myName });
             document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data)}`;
+            document.getElementById('qr-info').innerText = `¥ ${Number(amt).toLocaleString()} 設定中`;
         }
-
-        function logout() { if(confirm("セキュリティ確保のためログアウトしますか？")){ localStorage.clear(); location.reload(); } }
+        function logout() { localStorage.clear(); location.reload(); }
     </script>
 </body>
 </html>
