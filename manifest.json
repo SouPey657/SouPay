@@ -1,16 +1,20 @@
 {
-  "name": "SouPey",
-  "short_name": "SouPey",
+  "name": "SouPay",
+  "short_name": "SouPay",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ff0033",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/602/602182.png",
+      "src": "https://placehold.jp/24/ff0033/ffffff/192x192.png?text=SP",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://placehold.jp/24/ff0033/ffffff/512x512.png?text=SouPay",
       "sizes": "512x512",
       "type": "image/png"
     }
   ]
 }
-
