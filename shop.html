@@ -3,66 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SouPey Biz</title>
+    <title>SouPay加盟店</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        body { font-family: sans-serif; background: #0033ff; color: white; text-align: center; margin: 0; }
-        .main { background: white; color: #333; margin: 20px; border-radius: 20px; padding: 20px; }
-        #qr-canvas { width: 100%; max-width: 400px; border-radius: 10px; margin-bottom: 20px; }
-        .btn { background: #0033ff; color: white; border: none; padding: 20px; width: 100%; border-radius: 10px; font-size: 1.2rem; font-weight: bold; }
+        body { font-family: sans-serif; text-align: center; background: #f0f0f5; margin: 0; }
+        .header { background:#0066ff; color:white; padding:25px; font-weight:bold; font-size:1.2rem; }
+        .sales-card { background: white; margin: 20px; padding: 30px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .sales-val { font-size:2.8rem; font-weight:900; color:#0066ff; margin:15px 0; }
+        .btn-scan { background: #ff0033; color: white; padding: 20px 50px; border-radius: 50px; font-weight: bold; font-size: 1.3rem; border: none; cursor: pointer; width: 80%; }
+        #scanner { display:none; position:fixed; inset:0; background:black; z-index:999; }
+        #v { width:100%; height:100%; object-fit:cover; }
     </style>
 </head>
 <body>
-    <h1>SouPey Biz</h1>
-    <div class="main">
-        <p id="status">スキャン待機中</p>
-        <button class="btn" id="start-btn" onclick="startScan()">スキャン開始</button>
-        <canvas id="qr-canvas" style="display:none;"></canvas>
+    <div class="header">SouPay 加盟店管理パネル</div>
+    <div class="sales-card">
+        <div style="color:#888; font-size:0.9rem;">本日の総売上</div>
+        <div class="sales-val">¥ <span id="total-sales">0</span></div>
+        <button onclick="loadShopInfo()" style="border:none; background:none; color:#0066ff; cursor:pointer;"><i class="fas fa-sync"></i> 売上を更新</button>
+    </div>
+    
+    <button class="btn-scan" onclick="startScan()"><i class="fas fa-camera"></i> QRスキャン</button>
+
+    <div id="scanner">
+        <video id="v"></video>
+        <div style="position:absolute; top:30px; right:20px; color:white; font-size:2.5rem;" onclick="stopScan()">&times;</div>
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwu7LVX0uWWSFrDKofN2_gKmj8eTI1HX9sFl2AihIsJLMMWOoy7GwOAyukE8WiO6-_IrA/exec";
-        let shopName = localStorage.getItem('pp_shop') || "shop1"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbwnDGtnsgYinyBbNkiQ-lq0jveDCKi0PYAknpzihFv49y4et6gcLQbAjZe58YtTEEovZw/exec";
+        
+        window.onload = loadShopInfo;
+
+        async function loadShopInfo() {
+            try {
+                const res = await fetch(GAS_URL, { method:"POST", body:JSON.stringify({action:"get_shop_info"})});
+                const d = await res.json();
+                if(d.status === "success") document.getElementById('total-sales').innerText = Number(d.totalSales).toLocaleString();
+            } catch(e) { console.log("読み込み失敗"); }
+        }
 
         function startScan() {
-            const video = document.createElement("video");
-            const canvas = document.getElementById("qr-canvas");
-            const ctx = canvas.getContext("2d");
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(s => {
-                video.srcObject = s; video.setAttribute("playsinline", true); video.play();
-                document.getElementById("start-btn").style.display = "none";
-                document.getElementById("qr-canvas").style.display = "block";
+            document.getElementById('scanner').style.display='block';
+            navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}).then(s=>{
+                const v=document.getElementById('v'); v.srcObject=s; v.setAttribute("playsinline", true); v.play();
                 const tick = () => {
-                    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                        canvas.height = video.videoHeight; canvas.width = video.videoWidth;
-                        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                        const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
-                        if (code) {
-                            const d = JSON.parse(code.data);
-                            video.srcObject.getTracks().forEach(t => t.stop());
-                            processData(d);
-                            return;
-                        }
+                    if(v.readyState===v.HAVE_ENOUGH_DATA){
+                        const cv = document.createElement('canvas'); cv.width=v.videoWidth; cv.height=v.videoHeight;
+                        const ctx = cv.getContext('2d'); ctx.drawImage(v,0,0,cv.width,cv.height);
+                        const code = jsQR(ctx.getImageData(0,0,cv.width,cv.height).data, cv.width, cv.height);
+                        if(code){ process(code.data); stopScan(); return; }
                     }
-                    requestAnimationFrame(tick);
+                    if(document.getElementById('scanner').style.display==='block') requestAnimationFrame(tick);
                 };
-                tick();
+                requestAnimationFrame(tick);
             });
         }
 
-        function processData(d) {
-            const action = (d.t === "c") ? "charge" : "pay_process";
-            const msg = (d.t === "c") ? `${d.s}様へ ${d.a}円チャージしますか？` : `${d.s}様から ${d.a}円受け取りますか？`;
-            
-            if(confirm(msg)) {
-                fetch(`${GAS_URL}?name=${encodeURIComponent(shopName)}&target=${encodeURIComponent(d.s)}&amount=${d.a}&usePt=${d.pt}&action=${action}`)
-                .then(res => res.json()).then(res => {
-                    alert(res.status === "success" ? "完了！" : "エラー: " + res.message);
-                    location.reload();
-                });
-            } else { location.reload(); }
+        function stopScan(){ 
+            const v=document.getElementById('v');
+            if(v.srcObject) v.srcObject.getTracks().forEach(t=>t.stop());
+            document.getElementById('scanner').style.display='none'; 
+        }
+
+        async function process(data){
+            try {
+                const qr = JSON.parse(data);
+                const typeText = qr.t === 'p' ? "決済" : "チャージ";
+                if(!confirm(`${qr.s}様に ¥${qr.a.toLocaleString()} の${typeText}を実行しますか？`)) return;
+                
+                const res = await fetch(GAS_URL, { method:"POST", body:JSON.stringify({action:"execute_transaction", targetUser:qr.s, amount:qr.a, type:qr.t})});
+                const d = await res.json();
+                alert(d.message);
+                loadShopInfo();
+            } catch(e) { alert("QRエラー"); }
         }
     </script>
 </body>
 </html>
-
