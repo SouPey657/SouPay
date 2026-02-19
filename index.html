@@ -7,150 +7,76 @@
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/SouPay/icon/main/sp.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        :root { --pay-red: #ff0033; --bg-gray: #f4f4f6; }
-        body { font-family: -apple-system, "Helvetica Neue", sans-serif; background: var(--bg-gray); margin: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
-        
-        /* ログイン画面 */
-        #login-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .login-logo { color: var(--pay-red); font-size: 3.5rem; font-weight: 900; font-style: italic; margin-bottom: 5px; letter-spacing: -2px; }
-        .login-input { width: 85%; max-width: 300px; padding: 16px; border: 1px solid #ddd; border-radius: 14px; margin-bottom: 12px; font-size: 1rem; outline: none; transition: 0.3s; }
-        .login-input:focus { border-color: var(--pay-red); box-shadow: 0 0 0 3px rgba(255,0,51,0.1); }
-        .btn-red { width: 85%; max-width: 300px; padding: 16px; border-radius: 30px; background: var(--pay-red); color: white; border: none; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(255,0,51,0.3); }
-
-        /* メイン画面 */
-        .top-nav { background: var(--pay-red); color: white; padding: 60px 20px 30px; text-align: center; border-radius: 0 0 30px 30px; }
-        .user-name { font-size: 0.9rem; opacity: 0.9; margin-bottom: 5px; }
-        .balance-value { font-size: 3.5rem; font-weight: 900; line-height: 1; }
-        
-        .qr-card { background: white; margin: -25px 20px 20px; border-radius: 25px; padding: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-        #qr-img { width: 200px; height: 200px; margin: 10px 0; }
-        .qr-amt-display { font-size: 1.5rem; font-weight: bold; color: var(--pay-red); }
-
-        .action-btns { display: flex; justify-content: center; gap: 15px; padding: 20px; }
-        .btn-outline { padding: 10px 25px; border-radius: 20px; border: 1.5px solid #ddd; background: white; font-weight: bold; color: #555; }
-
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0 35px; border-top: 1px solid #eee; }
-        .nav-item { color: #ccc; font-size: 1.5rem; }
-        .nav-item.active { color: var(--pay-red); }
-
-        /* 加盟店切替用セクション */
-        .shop-link-sec { margin-top: 40px; border-top: 1px dotted #ccc; pt: 20px; width: 80%; text-align: center; }
-        .btn-shop { background: #1a237e; color: white; border: none; padding: 12px 20px; border-radius: 12px; font-size: 0.85rem; margin-top: 10px; display: inline-flex; align-items: center; gap: 8px; }
+        :root { --pay-red: #ff0033; }
+        body { font-family: -apple-system, sans-serif; background: #f4f4f6; margin: 0; user-select: none; }
+        .top-nav { background: var(--pay-red); color: white; padding: 50px 20px 25px; text-align: center; }
+        .balance-value { font-size: 3.2rem; font-weight: 900; line-height: 1; }
+        .qr-card { background: white; margin: -20px 15px 15px; border-radius: 25px; padding: 25px; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        #qr-img { width: 190px; height: 190px; border-radius: 10px; }
+        #login-screen { position: fixed; inset: 0; background: white; z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .login-input { width: 80%; padding: 15px; border: 1px solid #ddd; border-radius: 12px; margin-bottom: 12px; }
+        .btn-red { width: 85%; padding: 16px; border-radius: 30px; background: var(--pay-red); color: white; border: none; font-weight: bold; }
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0 30px; border-top: 1px solid #eee; }
     </style>
 </head>
 <body>
-
     <div id="login-screen">
-        <div class="login-logo">SouPay</div>
-        <p style="color:#888; margin-bottom:30px;">User Terminal</p>
-        
+        <h1 style="color:var(--pay-red); font-size:3rem; font-style:italic;">SouPay</h1>
         <input type="text" id="login-name" class="login-input" placeholder="ユーザー名">
         <input type="password" id="login-pass" class="login-input" placeholder="パスワード">
         <button class="btn-red" onclick="handleAuth('login')">ログイン</button>
-
-        <div class="shop-link-sec">
-            <p style="font-size: 0.75rem; color: #bbb; margin-top:15px;">加盟店・スタッフ用</p>
-            <button class="btn-shop" onclick="location.href='shop.html'">
-                <i class="fas fa-store"></i> 加盟店ログイン
-            </button>
-        </div>
     </div>
 
     <div id="main-app" style="display:none;">
         <div class="top-nav">
-            <div id="user-display" class="user-name">---</div>
+            <div id="user-display" style="font-size:0.8rem; margin-bottom:5px;">---</div>
             <div class="balance-value">¥ <span id="bal-display">0</span></div>
         </div>
-
         <div class="qr-card">
-            <img id="qr-img" src="" alt="QRコード">
-            <div id="qr-info" class="qr-amt-display">¥ 1,000</div>
+            <img id="qr-img" src="">
+            <div id="qr-info" style="color:var(--pay-red); font-weight:bold; margin-top:10px;">¥ 1,000</div>
         </div>
-
-        <div class="action-btns">
-            <button class="btn-outline" onclick="changeAmount()">金額変更</button>
+        <div style="text-align:center; padding: 20px;">
+            <button onclick="openModal('charge')" style="padding:10px 20px; border-radius:20px; border:1px solid #ddd;">金額変更</button>
         </div>
-
         <div class="nav-bar">
-            <div class="nav-item active" onclick="location.reload()"><i class="fas fa-qrcode"></i></div>
-            <div class="nav-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i></div>
+            <div onclick="location.reload()"><i class="fas fa-home fa-lg" style="color:var(--pay-red);"></i></div>
+            <div onclick="localStorage.clear();location.reload()"><i class="fas fa-sign-out-alt fa-lg"></i></div>
         </div>
     </div>
 
     <script>
-        // --- 設定エリア ---
-        const GAS_URL = "あなたのGASデプロイURL"; // ★作成したGASのURLを貼る
-        const API_KEY = "SouPay_Secure_2026";      // ★GAS側と一致させる
+        const GAS_URL = "あなたのGASデプロイURL";
+        const API_KEY = "SouPay_Secure_2026";
         let myName = localStorage.getItem('sp_user');
-        let currentMode = "p"; // p=決済, c=チャージ
+        let mode = "pay";
 
-        window.onload = () => {
-            if(myName){
-                document.getElementById('login-screen').style.display='none';
-                document.getElementById('main-app').style.display='block';
-                document.getElementById('user-display').innerText = myName + " 様の残高";
-                loadData();
-                updateQR(1000);
-            }
-        };
+        window.onload = () => { if(myName){ document.getElementById('login-screen').style.display='none'; document.getElementById('main-app').style.display='block'; loadData(); updateQR(1000); } };
 
-        // 認証処理
         async function handleAuth(type) {
-            const n = document.getElementById('login-name').value.trim();
-            const p = document.getElementById('login-pass').value.trim();
-            if(!n || !p) return alert("入力してください");
-
-            try {
-                const res = await fetch(GAS_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: type, name: n, pass: p, apiKey: API_KEY })
-                });
-                const d = await res.json();
-                if(d.status === "success") {
-                    localStorage.setItem('sp_user', n);
-                    location.reload();
-                } else {
-                    alert("認証エラー: " + d.message);
-                }
-            } catch (e) {
-                alert("接続に失敗しました");
-            }
-        }
-
-        // 残高読み込み
-        async function loadData() {
-            const res = await fetch(GAS_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "login", name: myName, pass: "dummy", apiKey: API_KEY })
-            });
+            const n = document.getElementById('login-name').value;
+            const p = document.getElementById('login-pass').value;
+            const res = await fetch(GAS_URL,{method:"POST",body:JSON.stringify({action:type,name:n,pass:p,apiKey:API_KEY})});
             const d = await res.json();
-            if(d.status === "success") {
-                document.getElementById('bal-display').innerText = d.balance.toLocaleString();
-            }
+            if(d.status==="success") { localStorage.setItem('sp_user',n); location.reload(); } else { alert(d.message); }
         }
 
-        // QR生成
+        async function loadData() {
+            const res = await fetch(GAS_URL,{method:"POST",body:JSON.stringify({action:"login",name:myName,pass:"dummy",apiKey:API_KEY})});
+            const d = await res.json();
+            if(d.status==="success") document.getElementById('bal-display').innerText = d.balance.toLocaleString();
+        }
+
         function updateQR(amt) {
-            const data = { t: currentMode, a: parseInt(amt), s: myName };
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(JSON.stringify(data))}`;
-            document.getElementById('qr-img').src = qrUrl;
+            const data = { t: mode==='pay'?'p':'c', a: parseInt(amt), s: myName };
+            document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(JSON.stringify(data))}`;
             document.getElementById('qr-info').innerText = `¥ ${Number(amt).toLocaleString()}`;
         }
-
-        function changeAmount() {
-            const a = prompt("金額を入力してください", "1000");
-            if(a && !isNaN(a)) updateQR(a);
-        }
-
-        function logout() {
-            if(confirm("ログアウトしますか？")) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
+        function openModal(m){ let a = prompt("金額","1000"); if(a) updateQR(a); }
     </script>
 </body>
 </html>
