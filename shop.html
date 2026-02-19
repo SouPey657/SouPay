@@ -2,127 +2,172 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SouPay Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>SouPay 加盟店管理</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <style>
-        :root { --shop-blue: #1a237e; --accent-gold: #ffd700; }
-        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; user-select: none; }
+        :root { --admin-blue: #1a237e; --accent-gold: #ffd700; }
+        body { font-family: -apple-system, sans-serif; background: var(--admin-blue); color: white; margin: 0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
         
-        /* ヘッダー：店舗用はブルー */
-        .header { background: var(--shop-blue); color: white; padding: 50px 20px 30px; text-align: center; border-radius: 0 0 30px 30px; }
-        .label { font-size: 0.8rem; opacity: 0.8; margin-bottom: 5px; }
-        .sales-amount { font-size: 2.8rem; font-weight: 900; color: var(--accent-gold); }
+        /* 管理画面（最初は隠しておく） */
+        #admin-main { display: none; width: 100%; text-align: center; }
+        
+        .header { padding: 60px 20px 30px; }
+        .sales-card { background: white; color: #333; padding: 30px; border-radius: 25px; width: 80%; max-width: 350px; margin: 0 auto; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .amount { font-size: 3rem; font-weight: 900; color: var(--admin-blue); }
+        .btn-scan { background: var(--accent-gold); color: var(--admin-blue); width: 80%; max-width: 350px; padding: 20px; border-radius: 40px; border: none; font-size: 1.5rem; font-weight: bold; margin-top: 40px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
-        /* メインボタン */
-        .container { padding: 20px; margin-top: -20px; }
-        .scan-card { background: white; border-radius: 25px; padding: 40px 20px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); cursor: pointer; }
-        .scan-icon { font-size: 4rem; color: var(--shop-blue); margin-bottom: 15px; }
-        .scan-text { font-size: 1.2rem; font-weight: bold; color: #333; }
-
-        /* 売上情報カード */
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .info-box { background: white; padding: 15px; border-radius: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .info-val { font-size: 1.2rem; font-weight: bold; color: var(--shop-blue); }
-
-        /* スキャナー */
+        /* スキャナー画面 */
         #scanner-screen { display: none; position: fixed; inset: 0; background: black; z-index: 3000; }
         #video { width: 100%; height: 100%; object-fit: cover; }
-        .scan-guide { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 250px; height: 250px; border: 2px solid var(--accent-gold); border-radius: 20px; box-shadow: 0 0 0 4000px rgba(0,0,0,0.5); }
-
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0 35px; border-top: 1px solid #eee; }
-        .nav-item { color: #888; font-size: 1.5rem; }
+        .cancel-btn { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); padding: 15px 30px; border-radius: 30px; border: none; background: white; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="label">本日の総売上</div>
-        <div class="sales-amount">¥ <span id="total-sales">0</span></div>
-        <div style="font-size:0.8rem; margin-top:10px;" onclick="loadShopData()"><i class="fas fa-sync-alt"></i> 更新</div>
-    </div>
-
-    <div class="container">
-        <div class="scan-card" onclick="startScan()">
-            <div class="scan-icon"><i class="fas fa-qrcode"></i></div>
-            <div class="scan-text">お客様をスキャン</div>
-            <div style="font-size:0.8rem; color:#888; margin-top:5px;">決済・チャージを実行します</div>
-        </div>
-
-        <div class="info-grid">
-            <div class="info-box">
-                <div class="label" style="color:#888">店舗名</div>
-                <div class="info-val">加盟店</div>
+    <div id="admin-main">
+        <div class="header">
+            <h1 style="font-style:italic; letter-spacing:-1px;">Store Admin</h1>
+            <div class="sales-card">
+                <div style="font-size:0.9rem; color:#888; margin-bottom:5px;">本日の総売上</div>
+                <div class="amount">¥ <span id="total-sales">0</span></div>
             </div>
-            <div class="info-box">
-                <div class="label" style="color:#888">ステータス</div>
-                <div class="info-val" style="color:#2ecc71">オンライン</div>
+            
+            <button class="btn-scan" onclick="startScan()">
+                <i class="fas fa-camera"></i> スキャン開始
+            </button>
+
+            <div style="margin-top:50px;">
+                <button onclick="location.reload()" style="background:none; border:1px solid rgba(255,255,255,0.5); color:white; padding:10px 25px; border-radius:20px; font-size:0.8rem;">ログアウト</button>
             </div>
         </div>
-    </div>
-
-    <div class="nav-bar">
-        <div class="nav-item" style="color:var(--shop-blue)"><i class="fas fa-store"></i></div>
-        <div class="nav-item" onclick="location.reload()"><i class="fas fa-chart-line"></i></div>
-        <div class="nav-item" onclick="alert('設定は準備中です')"><i class="fas fa-cog"></i></div>
     </div>
 
     <div id="scanner-screen">
-        <video id="video" playsinline></video>
-        <div class="scan-guide"></div>
-        <div style="position:absolute; top:40px; right:20px; color:white; font-size:2.5rem;" onclick="stopScan()">&times;</div>
+        <video id="video"></video>
+        <button class="cancel-btn" onclick="stopScan()">キャンセル</button>
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxrp1uhDOwR7xoeOxFgd__z4H1IltycvweqjVknzNKP0_kaF4fldIDfHKE02klffBEWgA/exec";
+        // ★設定：自分のGASのURLをここに貼る
+        const GAS_URL = "あなたのGASデプロイURL"; 
+        const API_KEY = "SouPay_Secure_2026";
 
-        window.onload = loadShopData;
+        // ページを開いた瞬間にパスワードを求める
+        window.onload = async () => {
+            const pass = prompt("【加盟店専用】パスワードを入力してください");
+            
+            if (!pass || pass.trim() === "") {
+                alert("パスワードが必要です。");
+                location.href = "index.html"; // 客用画面に戻す
+                return;
+            }
 
+            // GASにログイン確認を送る
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ 
+                        action: "login", 
+                        name: "加盟店", 
+                        pass: pass, 
+                        apiKey: API_KEY 
+                    })
+                });
+                const d = await res.json();
+
+                if (d.status === "success") {
+                    // 成功：管理画面を表示
+                    document.getElementById('admin-main').style.display = 'block';
+                    loadShopData();
+                } else {
+                    // 失敗：追い出す
+                    alert("パスワードが違います。");
+                    location.href = "index.html";
+                }
+            } catch (e) {
+                alert("エラー：通信に失敗しました。");
+                location.href = "index.html";
+            }
+        };
+
+        // 売上データの読み込み
         async function loadShopData() {
             try {
-                const res = await fetch(GAS_URL, { method:"POST", body:JSON.stringify({action:"get_shop_info"})});
+                const res = await fetch(GAS_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "get_shop_info", apiKey: API_KEY })
+                });
                 const d = await res.json();
                 if(d.status === "success") {
                     document.getElementById('total-sales').innerText = Number(d.totalSales).toLocaleString();
                 }
-            } catch(e) { console.error("データ取得失敗"); }
+            } catch (e) {
+                console.error("データ取得失敗");
+            }
         }
 
+        // --- QRスキャン機能 ---
+        let videoStream;
         function startScan() {
-            document.getElementById('scanner-screen').style.display='block';
-            navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}}).then(s=>{
-                const v=document.getElementById('video'); v.srcObject=s; v.play();
-                const tick = () => {
-                    if(v.readyState === v.HAVE_ENOUGH_DATA){
-                        const cv = document.createElement('canvas'); cv.width=v.videoWidth; cv.height=v.videoHeight;
-                        const ctx = cv.getContext('2d'); ctx.drawImage(v,0,0,cv.width,cv.height);
-                        const code = jsQR(ctx.getImageData(0,0,cv.width,cv.height).data, cv.width, cv.height);
-                        if(code){ processScanResult(code.data); stopScan(); return; }
-                    }
-                    if(document.getElementById('scanner-screen').style.display==='block') requestAnimationFrame(tick);
-                };
+            document.getElementById('scanner-screen').style.display = 'block';
+            const video = document.getElementById('video');
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(stream => {
+                videoStream = stream;
+                video.srcObject = stream;
+                video.setAttribute("playsinline", true);
+                video.play();
                 requestAnimationFrame(tick);
             });
         }
 
-        function stopScan(){ 
-            const v=document.getElementById('video');
-            if(v.srcObject) v.srcObject.getTracks().forEach(t=>t.stop());
-            document.getElementById('scanner-screen').style.display='none'; 
+        function stopScan() {
+            if(videoStream) videoStream.getTracks().forEach(track => track.stop());
+            document.getElementById('scanner-screen').style.display = 'none';
         }
 
-        async function processScanResult(data){
-            try {
-                const qr = JSON.parse(data);
-                const typeText = qr.t === 'p' ? '決済' : 'チャージ';
-                if(confirm(`【${typeText}確認】\n${qr.s}様\n金額: ¥${qr.a.toLocaleString()}\n実行しますか？`)){
-                    const res = await fetch(GAS_URL, { method:"POST", body:JSON.stringify({action:"execute_transaction", targetUser:qr.s, amount:qr.a, type:qr.t})});
-                    const d = await res.json();
-                    alert(d.message);
-                    loadShopData();
+        function tick() {
+            const video = document.getElementById('video');
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                const canvas = document.createElement("canvas");
+                canvas.height = video.videoHeight;
+                canvas.width = video.videoWidth;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+                if (code) {
+                    stopScan();
+                    processScanResult(code.data);
+                    return;
                 }
-            } catch(e) { alert("無効なQRコードです"); }
+            }
+            if (document.getElementById('scanner-screen').style.display === 'block') {
+                requestAnimationFrame(tick);
+            }
+        }
+
+        async function processScanResult(data) {
+            try {
+                const obj = JSON.parse(data);
+                const res = await fetch(GAS_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "execute_transaction",
+                        type: obj.t,
+                        amount: obj.a,
+                        targetUser: obj.s,
+                        apiKey: API_KEY
+                    })
+                });
+                const d = await res.json();
+                alert(d.message);
+                loadShopData(); // 売上を更新
+            } catch (e) {
+                alert("エラーが発生しました。");
+            }
         }
     </script>
 </body>
